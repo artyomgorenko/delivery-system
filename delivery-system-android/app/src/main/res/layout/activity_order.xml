@@ -1,57 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="ru.delivery.system.android.OrderActivity">
+    <!-- Inside the layout tag it is possible to set the data tag in order to set one or many variables. For this example we are having an User property-->
     <data>
-
         <variable
-            name="orders"
-            type="android.databinding.ObservableList&lt;ru.delivery.system.android.models.OrderData&gt;" />
+            name="order"
+            type="ru.delivery.system.android.models.OrderData" />
     </data>
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:orientation="vertical"
-        tools:context="com.example.android.databoundrecyclerview.MainActivity"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <!--tools:context=".OrdersActivity"-->
+        <TextView
+            android:id="@+id/orderIdTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textStyle="bold"
+            android:text="@{`Номер заказа: ` + Integer.toString(order.id)}"
+            tools:text="OrderId" />
+
+        <TextView
+            android:id="@+id/orderDescriptionTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textStyle="bold"
+            android:text="@{`Описание: ` + order.description}"
+            tools:text="Description" />
+
+        <TextView
+            android:id="@+id/orderDepartmentTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textStyle="bold"
+            android:text="@{`Адрес склада: ` + order.departmentAddress}"
+            tools:text="Department: Краснодар, Уральская 112" />
+
+        <TextView
+            android:id="@+id/orderDestinationTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textStyle="bold"
+            android:text="@{`Адрес доставки: ` + order.destinationAddress}"
+            tools:text="Destination: Краснодар, Уральская 112" />
+
+        <TextView
+            android:id="@+id/orderDeliveryTimeTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textStyle="bold"
+            android:text="@{`Время доставки: ` + order.deliveryTime}"
+            tools:text="Delivery time: 12:00" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:orientation="vertical"
-            app:entries="@{orders}"
-            app:layout="@{@layout/item}" />
+            android:layout_height="283dp"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            <org.osmdroid.views.MapView
+                android:id="@+id/map"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" />
+        </LinearLayout>
+
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal">
 
             <Button
-                android:id="@+id/addOrderButton"
-                android:layout_width="450dp"
+                android:id="@+id/getInWorkButton"
+                android:layout_width="match_parent"
                 android:layout_height="60dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentBottom="true"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="100dp"
-                android:text="ADD" />
-        </LinearLayout>
+                android:layout_marginStart="0dp"
+                android:layout_marginBottom="6dp"
+                android:text="ВЗЯТЬ В РАБОТУ"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!--TODO: implement progress bar-->
+            <!--<ProgressBar-->
+
+            <!--android:id="@+id/progressBar"-->
+            <!--android:layout_width="40dp"-->
+            <!--android:layout_height="40dp"-->
+            <!--android:visibility="visible" />-->
+
+        </RelativeLayout>
+
+
+
     </LinearLayout>
-    <!--tools:context=".OrdersActivity"-->
-    <!--<TextView-->
-    <!--android:id="@+id/orderIdTextView"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:padding="16dp"-->
-    <!--android:text="@{Integer.toString(order.id)}"-->
-    <!--tools:text="orderId" />-->
-
-    <!--<TextView-->
-    <!--android:id="@+id/orderDescriptionTextView"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:padding="16dp"-->
-    <!--android:text="@{order.description}"-->
-    <!--tools:text="Description" />-->
-
 
 </layout>

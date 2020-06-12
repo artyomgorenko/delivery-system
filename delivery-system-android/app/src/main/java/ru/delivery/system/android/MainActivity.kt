@@ -1,10 +1,12 @@
 package ru.delivery.system.android
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
@@ -13,20 +15,29 @@ import android.view.MenuItem
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import ru.delivery.system.android.controllers.OrderScheduler
 import ru.delivery.system.android.utils.HttpHelper
 
 class MainActivity : AppCompatActivity() {
     private val httpHelpler = HttpHelper
 
+    companion object {
+        @SuppressLint("StaticFieldLeak")
+        lateinit var context: Context
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        context = this
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
-
-        ordersButton.setOnClickListener { navigateTo(this, OrderActivity::class.java) }
+//        setSupportActionBar(toolbar)
+        OrderScheduler.runScheduling()
+        ordersButton.setOnClickListener { navigateTo(this, OrdersActivity::class.java) }
         mapButton.setOnClickListener { navigateTo(this, MapActivity::class.java) }
-        settingsButton.setOnClickListener { navigateTo(this, MapActivity::class.java) }
+        settingsButton.setOnClickListener { navigateTo(this, AppSettingsActivity::class.java) }
         exitButton.setOnClickListener { finish(); System.exit(0) }
+
+        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         fab.setOnClickListener { view ->
             var message: String
@@ -54,7 +65,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun orderButtonAction() {
         val randomIntent = Intent(this, OrdersActivity::class.java)
-        randomIntent.putExtra(OrdersActivity.orderId, "10")
+        randomIntent.putExtra(OrderActivity.orderId, "10")
         startActivity(randomIntent)
     }
 

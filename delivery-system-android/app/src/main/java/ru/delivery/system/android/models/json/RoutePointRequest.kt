@@ -6,11 +6,14 @@ class RoutePointRequest {
     @JsonProperty(value = "orderId")
     var orderId: Int? = null
 
+    @JsonProperty(value = "driverId")
+    var driverId: Int? = null
+
     @JsonProperty(value = "serialNumber")
     var serialNumber: Int? = null
 
     @JsonProperty(value = "geoPoint")
-    var geoPoint: GeoPoint = GeoPoint()
+    var geoPoint: GeoPoint? = null
 
     class GeoPoint {
         @JsonProperty(value = "latitude")

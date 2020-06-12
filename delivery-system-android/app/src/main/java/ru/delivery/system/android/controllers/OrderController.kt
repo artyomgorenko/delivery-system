@@ -1,14 +1,18 @@
 package ru.delivery.system.android.controllers
 
+import android.location.Location
 import android.util.Log
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Response
-import ru.delivery.system.android.models.OrderModel
+import ru.delivery.system.android.MainActivity
+import ru.delivery.system.android.MapActivity
+import ru.delivery.system.android.models.UserModel
 import ru.delivery.system.android.models.json.OrderInfoResponse
 import ru.delivery.system.android.models.json.RoutePointRequest
 import ru.delivery.system.android.utils.HttpHelper
 import ru.delivery.system.android.utils.JsonSerializer
+import ru.delivery.system.android.utils.getLastLocation
 import java.io.IOException
 import java.lang.Exception
 import java.util.concurrent.Executors
@@ -23,7 +27,7 @@ object OrderController {
 
     fun addRoutePoint(requestEntity: RoutePointRequest) {
         val json = serializer.toJson(requestEntity)
-        httpHelpler.post("order/changeOrderStatus", json, object : Callback {
+        httpHelpler.post("order/addRoutePoint", json, object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 log("Failed to send request with route point.")
             }
@@ -55,35 +59,44 @@ object OrderController {
     }
 }
 
+/**
+ * Отправляет информацию о текущем местоположении курьера через заданные промежутки времени.
+ * Если есть заказ в работе, то дополнительно отправляет orderId и serialNum
+ */
 object OrderScheduler {
     private lateinit var scheduledService: ScheduledExecutorService
-    private val httpHelpler = HttpHelper
+    private val userModel = UserModel
     private val serialNum = AtomicInteger(0)
     val isRunning = AtomicBoolean(false)
-    val currentOrderId = AtomicInteger()
+    @Volatile var currentOrderId: Int? = null
 
     init {
         initScheduler()
     }
 
     private fun initScheduler() {
-        scheduledService = Executors.newSingleThreadScheduledExecutor()
+        if (!::scheduledService.isInitialized) {
+            scheduledService = Executors.newSingleThreadScheduledExecutor()
+        }
     }
 
-    fun runScheduling(orderId: Int) {
-        currentOrderId.set(orderId)
-        var orderEntity = RoutePointRequest()
-        orderEntity.orderId = orderId
-
-        // TODO: set real lat and long
-        orderEntity.geoPoint = RoutePointRequest.GeoPoint().apply {
-            latitude = 10.0F
-            longitude = 20.0F
-        }
-
-        val task = SendCoordsTask(orderEntity)
+    fun runScheduling() {
+        val task = SendCoordsTask()
         scheduledService.scheduleWithFixedDelay(task, 2, 2, TimeUnit.SECONDS)
         isRunning.set(true)
+    }
+
+    fun startOrderTracking(orderId: Int) {
+        if (!isRunning.get()) {
+            runScheduling()
+        }
+        currentOrderId = orderId
+        serialNum.set(0)
+    }
+
+    fun stopOrderTracking() {
+        currentOrderId = null
+        serialNum.set(0)
     }
 
     fun stopScheduling() {
@@ -107,10 +120,29 @@ object OrderScheduler {
         }
     }
 
-    class SendCoordsTask(private var requestEntity: RoutePointRequest) : Runnable {
+    /**
+     * Таск для переодической отправки координат.
+     * OrderId отправляется в зависимости от того, есть  ли заказ в работе,
+     */
+    class SendCoordsTask : Runnable {
         override fun run() {
-            requestEntity.serialNumber = serialNum.incrementAndGet()
-            OrderController.addRoutePoint(requestEntity)
+            val location: Location? = getLastLocation(MainActivity.context, MapActivity.mGoogleApiClient)
+            location?.let { it ->
+                isRunning.set(true)
+                val requestEntity = RoutePointRequest().apply {
+                    driverId = userModel.userId
+                    currentOrderId?.let {
+                        orderId = currentOrderId
+                        serialNumber = serialNum.incrementAndGet()
+                    }
+                    geoPoint = RoutePointRequest.GeoPoint().apply {
+                        latitude = location.latitude.toFloat()
+                        longitude = location.longitude.toFloat()
+                    }
+                }
+
+                OrderController.addRoutePoint(requestEntity)
+            }
         }
     }
 }

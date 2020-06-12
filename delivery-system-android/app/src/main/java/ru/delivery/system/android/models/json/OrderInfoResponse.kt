@@ -1,6 +1,5 @@
 package ru.delivery.system.android.models.json
 
-import org.osmdroid.util.GeoPoint
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.*
 
@@ -78,6 +77,14 @@ class OrderInfoResponse {
 
             @JsonProperty(value = "geoPoint")
             val geoPoint: GeoPoint? = null
+
+            inner class GeoPoint {
+                @JsonProperty(value = "latitude")
+                val latitude: Float? = null
+
+                @JsonProperty(value = "longitude")
+                val longitude: Float? = null
+            }
         }
     }
 }
