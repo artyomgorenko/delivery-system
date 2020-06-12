@@ -34,9 +34,29 @@ public class OrderEntity {
     @Column(name = "o_departure_point")
     private String departurePoint;
 
+    @Basic
+    @Column(name = "o_departure_latitude")
+    @Getter @Setter
+    private Float departureLatitude;
+
+    @Basic
+    @Column(name = "o_departure_longitude")
+    @Getter @Setter
+    private Float departureLongitude;
+
     @Getter @Setter
     @Column(name = "o_destination_point")
     private String destinationPoint;
+
+    @Basic
+    @Column(name = "o_destination_latitude")
+    @Getter @Setter
+    private Float destinationLatitude;
+
+    @Basic
+    @Column(name = "o_destination_longitude")
+    @Getter @Setter
+    private Float destinationLongitude;
 
     @Getter @Setter
     @Column(name = "O_STATUS")

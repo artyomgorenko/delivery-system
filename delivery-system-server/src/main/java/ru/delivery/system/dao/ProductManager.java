@@ -6,6 +6,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.List;
 
 @Stateless
 public class ProductManager {
@@ -17,6 +18,11 @@ public class ProductManager {
         return em.createQuery("select o from ProductEntity o where o.id = :productId", ProductEntity.class)
                 .setParameter("productId", productId)
                 .getSingleResult();
+    }
+
+
+    public List<ProductEntity> getProductList() {
+        return em.createQuery("select p from ProductEntity p", ProductEntity.class).getResultList();
     }
 
     @TransactionAttribute

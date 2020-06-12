@@ -22,6 +22,11 @@ public class ProductEntity {
     @Getter @Setter
     private String name;
 
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "p_category", referencedColumnName = "c_id", nullable = false)
+    @Getter @Setter
+    private CategoryEntity category;
+
     @Basic
     @Column(name = "p_weight")
     @Getter @Setter

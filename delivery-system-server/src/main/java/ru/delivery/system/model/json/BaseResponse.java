@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-public abstract class BaseJsonModel {
+public abstract class BaseResponse {
     @JsonProperty("header")
     @Getter @Setter
     private Header header;

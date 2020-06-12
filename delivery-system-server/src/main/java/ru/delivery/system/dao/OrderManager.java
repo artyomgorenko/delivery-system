@@ -34,13 +34,21 @@ public class OrderManager {
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public OrderEntity createOrder(OrderIncoming orderIncoming) {
-        TransportEntity transportEntity = transportManager.getTransportById(orderIncoming.getTransportId());
-        if (transportEntity == null) {
-            throw new RuntimeException("Не найдена машина с id = " + orderIncoming.getTransportId());
+        TransportEntity transportEntity = null;
+        UserEntity userEntity = null;
+        if (orderIncoming.getTransportId() != null && orderIncoming.getDriverId() != null) {
+            transportEntity = transportManager.getTransportById(orderIncoming.getTransportId());
+            if (transportEntity == null) {
+                throw new RuntimeException("Не найдена машина с id = " + orderIncoming.getTransportId());
+            }
+            userEntity = userManager.getUserById(orderIncoming.getDriverId());
+            if (userEntity == null) {
+                throw new RuntimeException("Не найден водитель с id = " + orderIncoming.getTransportId());
+            }
         }
-        UserEntity userEntity = userManager.getUserById(orderIncoming.getDriverId());
-        if (userEntity == null) {
-            throw new RuntimeException("Не найдена водитель с id = " + orderIncoming.getTransportId());
+
+        if (orderIncoming.getProductList() == null) {
+            throw new RuntimeException("В заказе не задан список товаров");
         }
 
         OrderEntity orderEntity = new OrderEntity();
@@ -58,7 +66,7 @@ public class OrderManager {
             if (productEntity != null) {
                 OrderDetailsEntity orderDetailsEntity = new OrderDetailsEntity();
                 orderDetailsEntity.setProduct(productEntity);
-                orderDetailsEntity.setOdId(orderEntity.getOId());
+                orderDetailsEntity.setOrder(orderEntity);
                 orderDetailsEntity.setCount(product.getCount());
                 em.persist(orderDetailsEntity);
             }

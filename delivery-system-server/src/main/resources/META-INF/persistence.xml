@@ -17,6 +17,8 @@
         <class>ru.delivery.system.common.OrderDetailsEntity</class>
         <class>ru.delivery.system.common.UsersEntity</class>
         <class>ru.delivery.system.common.ProductEntity</class>
+        <class>ru.delivery.system.model.entities.CategoryEntity</class>
+        <class>ru.delivery.system.common.MapRoutePointEntity</class>
         <properties>
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />

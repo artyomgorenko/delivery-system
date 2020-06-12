@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "map_route_point", schema = "public", catalog = "delivery_system")
@@ -29,6 +30,11 @@ public class MapRoutePointEntity {
     @Column(name = "mrp_longitude")
     @Getter @Setter
     private Float mrpLongitude;
+
+    @Basic
+    @Column(name = "mrp_time")
+    @Getter @Setter
+    private Timestamp mrpTime;
 
     @ManyToOne
     @JoinColumn(name = "mrp_mr_id", referencedColumnName = "mr_id", nullable = false, insertable = false, updatable = false)

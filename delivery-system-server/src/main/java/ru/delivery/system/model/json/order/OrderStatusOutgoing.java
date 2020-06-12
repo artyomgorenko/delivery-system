@@ -3,9 +3,9 @@ package ru.delivery.system.model.json.order;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import ru.delivery.system.model.json.BaseJsonModel;
+import ru.delivery.system.model.json.BaseResponse;
 
-public class OrderStatusOutgoing extends BaseJsonModel {
+public class OrderStatusOutgoing extends BaseResponse {
 
     @JsonProperty("body")
     @Getter @Setter

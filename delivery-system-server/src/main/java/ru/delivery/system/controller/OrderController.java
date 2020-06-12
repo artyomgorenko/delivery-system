@@ -6,6 +6,7 @@ import ru.delivery.system.dao.OrderManager;
 import ru.delivery.system.dao.TransportManager;
 import ru.delivery.system.dao.UserManager;
 import ru.delivery.system.model.entities.*;
+import ru.delivery.system.model.json.common.RoutePoint;
 import ru.delivery.system.model.json.order.*;
 import ru.delivery.system.model.other.GeoPoint;
 
@@ -140,23 +141,25 @@ public class OrderController {
         orderInfoOutgoing.setDestinationPoint(orderEntity.getDestinationPoint());
 
         // Route
-        OrderInfoOutgoing.Route route = new OrderInfoOutgoing.Route();
-        List<MapRoutePointEntity> mapRoutePoints = orderEntity.getOrderMapRoutes().get(0).getMapRouteEntity().getMapRoutePoints();
-        List<OrderInfoOutgoing.Route.RoutePoint> routePoints = new ArrayList<>();
+        if (!orderEntity.getOrderMapRoutes().isEmpty()) {
+            OrderInfoOutgoing.Route route = new OrderInfoOutgoing.Route();
+            List<MapRoutePointEntity> mapRoutePoints = orderEntity.getOrderMapRoutes().get(0).getMapRouteEntity().getMapRoutePoints();
+            List<RoutePoint> routePoints = new ArrayList<>();
 
-        for (MapRoutePointEntity pointEntity : mapRoutePoints) {
-            OrderInfoOutgoing.Route.RoutePoint routePoint = new OrderInfoOutgoing.Route.RoutePoint();
-            GeoPoint geoPoint = new GeoPoint();
-            routePoint.setSerialNumber(pointEntity.getMrpSerialNumber());
-            geoPoint.setLatitude(pointEntity.getMrpLatitude());
-            geoPoint.setLongitude(pointEntity.getMrpLongitude());
-            routePoint.setGeoPoint(geoPoint);
-            routePoints.add(routePoint);
+            for (MapRoutePointEntity pointEntity : mapRoutePoints) {
+                RoutePoint routePoint = new RoutePoint();
+                GeoPoint geoPoint = new GeoPoint();
+                routePoint.setSerialNumber(pointEntity.getMrpSerialNumber());
+                geoPoint.setLatitude(pointEntity.getMrpLatitude());
+                geoPoint.setLongitude(pointEntity.getMrpLongitude());
+                routePoint.setGeoPoint(geoPoint);
+                routePoints.add(routePoint);
+            }
+            route.setRoutePoints(routePoints);
+            List<GeoPoint> geoPoints = routePoints.stream().map(RoutePoint::getGeoPoint).collect(Collectors.toList());
+            route.setRouteDistance(calacRouteDistance(geoPoints));
+            orderInfoOutgoing.setOrderRoute(route);
         }
-        route.setRoutePoints(routePoints);
-        List<GeoPoint> geoPoints = routePoints.stream().map(OrderInfoOutgoing.Route.RoutePoint::getGeoPoint).collect(Collectors.toList());
-        route.setRouteDistance(calacRouteDistance(geoPoints));
-        orderInfoOutgoing.setOrderRoute(route);
 
         // Product list
         List<OrderInfoOutgoing.Product> productList = new ArrayList<>();

@@ -29,7 +29,7 @@ public class OrderDetailsEntity {
     /**
      * Ссылка на заказ
      */
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "odo_id", referencedColumnName = "o_id", nullable = false)
     @Getter @Setter
     private OrderEntity order;
@@ -37,7 +37,7 @@ public class OrderDetailsEntity {
     /**
      * Ссылка на продукт
      */
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "od_product_id", referencedColumnName = "p_id")
     @Getter @Setter
     private ProductEntity product;

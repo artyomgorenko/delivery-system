@@ -1,5 +1,7 @@
 package ru.delivery.system.common.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.function.Function;
 
 public class Utils {
@@ -8,6 +10,14 @@ public class Utils {
             return fallback;
         } else {
             return function.apply(obj);
+        }
+    }
+
+    public static <T> Collection<T> emptyIfNull(Collection<T> collection) {
+        if (collection == null) {
+            return new ArrayList<>();
+        } else {
+            return collection;
         }
     }
 }
