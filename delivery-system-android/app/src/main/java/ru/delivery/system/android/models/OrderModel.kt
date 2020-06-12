@@ -1,7 +1,7 @@
 package ru.delivery.system.android.models
 
 object OrderModel {
-    var orderData: OrderData? = OrderData(999, "####")
+    var orderData: OrderData? = null/*OrderData(999, "####")*/
 
     /**
      * Статусы для отображения маршрута на карте:

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
 import android.os.AsyncTask
 import android.support.v4.content.res.ResourcesCompat
+import android.util.Log
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.bonuspack.routing.RoadManager
@@ -64,12 +65,16 @@ class OsmMapController(private var mapView: MapView) {
     }
 
     fun addMarker(geoPoint: GeoPoint, icon: Drawable) {
-        val marker = Marker(mapView)
-        marker.position = geoPoint
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-        marker.icon = icon
-        marker.title = "StartPoint"
-        mapView.overlays.add(marker)
+        try { // @HINT: try to fix map initialization NPE
+            val marker = Marker(mapView)
+            marker.position = geoPoint
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            marker.icon = icon
+            marker.title = "StartPoint"
+            mapView.overlays.add(marker)
+        } catch (e : Exception) {
+            Log.e("OsmMapController", "Failed to create marker. ${e.message}")
+        }
     }
 
     fun invalidate() {

@@ -9,8 +9,6 @@ import kotlinx.android.synthetic.main.activity_orders.*
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Response
-import ru.delivery.system.android.controllers.OrderController
-import ru.delivery.system.android.databinding.ActivityOrderBinding
 import ru.delivery.system.android.databinding.ActivityOrdersBinding
 import ru.delivery.system.android.models.OrderData
 import ru.delivery.system.android.models.json.OrderInfoResponse
@@ -36,9 +34,13 @@ class OrdersActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         updateOrdersList.setOnClickListener {
-            runOnUiThread { orders.clear() }
             updateOrdersList()
         }
+    }
+
+    override fun onResume() {
+        updateOrdersList()
+        super.onResume()
     }
 
     private fun updateOrdersList() {
@@ -55,8 +57,17 @@ class OrdersActivity : AppCompatActivity() {
                         if  (response.isSuccessful) {
                             response.body()?.let{ body ->
                                 val responseEntity = jsonSerializer.toEntity<List<OrderInfoResponse>>(body.string())
-                                runOnUiThread { orders.addAll(responseEntity.map { OrderData(it.orderId!!, it.status!!) }) }
-                                runOnUiThread { toast(context, "New orders list update. Size ${responseEntity.size}") }
+                                runOnUiThread {
+                                    orders.clear()
+                                    orders.addAll(responseEntity.map { OrderData(
+                                        it.orderId!!,
+                                        it.status!!,
+                                        it.departurePoint!!,
+                                        it.destinationPoint!!
+                                    //TODO: add order products
+                                    ) })
+                                    toast(context, "New orders list update. Size ${responseEntity.size}")
+                                }
                                 Log.i(TAG, "New orders list update. Size ${responseEntity.size}")
                             }
                         } else {

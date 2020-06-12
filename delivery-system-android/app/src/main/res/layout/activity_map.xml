@@ -17,13 +17,13 @@
             <org.osmdroid.views.MapView
                 android:id="@+id/map"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent" />
+                android:layout_height="530dp" />
         </LinearLayout>
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/constraintLayout"
             android:layout_width="409dp"
-            android:layout_height="49dp"
+            android:layout_height="70dp"
             app:layout_constraintBottom_toBottomOf="parent">
 
             <TextView
@@ -44,16 +44,17 @@
 
             <Button
                 android:id="@+id/finishOrderButton"
-                android:layout_width="162dp"
+                android:layout_width="171dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="60dp"
+                android:layout_marginEnd="52dp"
                 android:layout_marginBottom="8dp"
-                android:text="ЗАВЕРШИТЬ ЗАКАЗ"
+                android:background="@drawable/background_border_focused"
+                android:text="Начать отгрузку"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
+                app:layout_constraintVertical_bias="1.0" />
         </android.support.constraint.ConstraintLayout>
     </android.support.constraint.ConstraintLayout>
 

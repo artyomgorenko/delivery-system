@@ -1,15 +1,24 @@
 package ru.delivery.system.android.utils
 
 import okhttp3.*
+import android.preference.PreferenceManager
+import ru.delivery.system.android.MainActivity
+
 
 object HttpHelper {
     private var client = OkHttpClient()
     private val JSON = MediaType.parse("application/json; charset=utf-8")
     private val prefix = "http://192.168.0.103:8080/delivery-system/"
 
+    private fun getUrl() : String {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.context)
+        val ip = prefs.getString("connect_ip", "192.168.0.103")
+        return "http://$ip:8080/delivery-system/"
+    }
+
     fun get(url: String, callback: Callback): Call {
         val request = Request.Builder()
-            .url(prefix + url)
+            .url(getUrl() + url)
             .build()
 
         val call = client.newCall(request)
@@ -20,7 +29,7 @@ object HttpHelper {
     fun post(url: String, jsonBody: String, callback: Callback): Call {
         val body = RequestBody.create(JSON, jsonBody)
         val request = Request.Builder()
-            .url(prefix + url)
+            .url(getUrl() + url)
             .post(body)
             .build()
 
@@ -31,7 +40,7 @@ object HttpHelper {
 
     fun syncGet(url: String): Response {
         val request = Request.Builder()
-            .url(prefix + url)
+            .url(getUrl() + url)
             .build()
         return client.newCall(request).execute()
     }
@@ -39,7 +48,7 @@ object HttpHelper {
     fun syncPost(url: String, jsonBody: String): Response {
         val body = RequestBody.create(JSON, jsonBody)
         val request = Request.Builder()
-            .url(prefix + url)
+            .url(getUrl() + url)
             .post(body)
             .build()
         return client.newCall(request).execute()

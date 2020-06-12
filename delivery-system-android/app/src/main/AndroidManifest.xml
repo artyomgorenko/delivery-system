@@ -47,7 +47,8 @@
         <activity
             android:label="Информация о заказе"
             android:screenOrientation="portrait"
-            android:name=".OrderActivity" />
+            android:name=".OrderActivity"
+            android:parentActivityName=".OrdersActivity"/>
         <activity
             android:label=""
             android:screenOrientation="portrait"

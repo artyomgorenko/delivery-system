@@ -31,6 +31,7 @@ import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Button
 import kotlinx.android.synthetic.main.activity_map.*
 import okhttp3.Call
 import okhttp3.Callback
@@ -66,8 +67,37 @@ class MapActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
         setContentView(R.layout.activity_map)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        finishOrderButton.setOnClickListener { _ ->
-            OrderModel.orderData?.let { finishOrder() }
+        val orderControlButton = findViewById<Button>(R.id.finishOrderButton)
+        orderControlButton.tag = 0
+        title = "Получение товаров"
+        orderControlButton.text = "Начать отгрузку"
+
+        orderControlButton.setOnClickListener { view ->
+            OrderModel.orderData?.let {
+                if (view.tag == 0) {
+                    startProductShipment()
+
+                    orderControlButton.tag = 1
+                    orderControlButton.text = "Завершить отгрузку"
+                    title = "Отгрузка товара"
+                }
+                else if (view.tag == 1) {
+//                    orderControlButton.text = "Завершить отгрузку"
+//                    title = "Отгрузка товара"
+                    startDelivering()
+                    orderControlButton.tag = 2
+                    orderControlButton.text = "Завершить доставку"
+                    title = "Доставка товара"
+                }
+                else if (view.tag == 2) {
+//                    orderControlButton.text = "Завершить доставку"
+//                    title = "Доставка товара"
+                    finishOrder()
+                    orderControlButton.tag = 0
+                    orderControlButton.text = "Начать отгрузку"
+                    title = "Получение товаров"
+                }
+            }
         }
 
         if (mGoogleApiClient == null) {
@@ -352,7 +382,7 @@ class MapActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
             val context = this
             return changeOrderStatus(orderId, "DONE", object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    Toast.makeText(context, "Request failed", Toast.LENGTH_SHORT).show()
+                    runOnUiThread { Toast.makeText(context, "Request failed", Toast.LENGTH_SHORT).show() }
                 }
 
                 override fun onResponse(call: Call, response: Response) {
@@ -362,22 +392,23 @@ class MapActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
                             if (orderStatusResponse.header.resultCode == 0) {
                                 OrderModel.clearModel()
                                 OrderScheduler.stopOrderTracking()
+                                val orderInfo = orderStatusResponse.body
                                 runOnUiThread { toast(context, "Заказ завершен") }
-                                val dialogBuilder = AlertDialog.Builder(context)
+                                val dialogBuilder = AlertDialog.Builder(context, android.R.style.Theme_Material_Light_Dialog_Alert)
                                 dialogBuilder
                                     .setMessage("""
-                                            Заказ взят в работу в 9:45
-                                            Товар отгружен со склада в 10:15
-                                            Товар доставлен заказчику в 12:50
-                                            Путь до склада составил 1200 метров
-                                            Путь до места назначения составил 700 метров
+                                            Заказ взят в работу в ${orderInfo.startDate}
+                                            Отгрузка товаров со начата в ${orderInfo.startShipmentDate}
+                                            Товар отгружен со склада в ${orderInfo.startDeliveringDate}
+                                            Товар доставлен заказчику в ${orderInfo.doneDate}
+                                            Общий путь составил ${orderInfo.deliveryRouteLength}
 
-                                            Конечная стоимость доставки 453 р.
+                                            Конечная стоимость доставки ${orderInfo.totalCost}
                                         """.trimIndent()
                                     )
                                     .setCancelable(false)
                                     .setPositiveButton("Ок") { dialog, _ -> dialog.cancel() }
-                                    .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+//                                    .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
                                 //.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
                                 runOnUiThread {
                                     val alert = dialogBuilder.create()
@@ -390,6 +421,89 @@ class MapActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
                                         context,
                                         "Заказ не может быть завершен:\n" + "${orderStatusResponse.header.message}"
                                     )
+                                }
+                            }
+                        }
+                    }
+                }
+            })
+        }
+    }
+
+    private fun showDialog (context: Context, title: String, message: String) {
+        val dialogBuilder = AlertDialog.Builder(context, android.R.style.Theme_Material_Light_Dialog_Alert)
+        dialogBuilder
+            .setMessage(message)
+            .setCancelable(false)
+            .setPositiveButton("Ок") { dialog, _ -> dialog.cancel() }
+//            .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+        runOnUiThread {
+            val alert = dialogBuilder.create()
+            alert.setTitle(title)
+            alert.show()
+        }
+    }
+
+    /**
+     * Запрос на начало отгрузки товара
+     */
+    private fun startProductShipment() {
+        OrderModel.orderData?.let {
+            val orderId: Int = it.id
+            val context = this
+            return changeOrderStatus(orderId, "PRODUCT_SHIPMENT", object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    runOnUiThread { Toast.makeText(context, "Request failed", Toast.LENGTH_SHORT).show() }
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    if (response.isSuccessful) {
+                        response.body()?.let { body ->
+                            val orderStatusResponse = JsonSerializer().toEntity<OrderStatusResponse>(body.string())
+                            if (orderStatusResponse.header.resultCode == 0) {
+                                runOnUiThread { toast(context, "Начата отгрузка товаров") }
+                            } else {
+                                runOnUiThread {
+                                    toast(context, "Заказ не может быть взят в работу:\n" + "${orderStatusResponse.header.message}")
+                                }
+                            }
+                        }
+                    } else {
+                        runOnUiThread { toast(context, "Начата отгрузка товаров") }
+                    }
+                }
+            })
+        }
+    }
+
+    /**
+     * Запрос на начало доставки товара
+     */
+    private fun startDelivering() {
+        OrderModel.orderData?.let {
+            val orderId: Int = it.id
+            val context = this
+            return changeOrderStatus(orderId, "DELIVERING", object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    runOnUiThread { Toast.makeText(context, "Request failed", Toast.LENGTH_SHORT).show() }
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    if (response.isSuccessful) {
+                        response.body()?.let { body ->
+                            val orderStatusResponse = JsonSerializer().toEntity<OrderStatusResponse>(body.string())
+                            if (orderStatusResponse.header.resultCode == 0) {
+                                startProductShipment()
+                                showDialog(context, "Подтвердите отгрузку товаров", """
+//                                    ${OrderModel.orderData}
+                                    Product#1 - 3 шт.
+                                    Product#2 - 4 шт.
+                                    Product#3 - 1 шт.
+                                """.trimIndent())
+                                runOnUiThread { toast(context, "Отгрузка товаров завершена") }
+                            } else {
+                                runOnUiThread {
+                                    toast(context, "Заказ не может быть взят в работу:\n" + "${orderStatusResponse.header.message}")
                                 }
                             }
                         }

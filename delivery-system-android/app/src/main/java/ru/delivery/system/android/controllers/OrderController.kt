@@ -1,6 +1,7 @@
 package ru.delivery.system.android.controllers
 
 import android.location.Location
+import android.preference.PreferenceManager
 import android.util.Log
 import okhttp3.Call
 import okhttp3.Callback
@@ -80,9 +81,15 @@ object OrderScheduler {
         }
     }
 
+    private fun getSchedulingDelay() : Long {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.context)
+        return prefs.getLong("sync_frequency_s", 10)
+    }
+
     fun runScheduling() {
         val task = SendCoordsTask()
-        scheduledService.scheduleWithFixedDelay(task, 2, 2, TimeUnit.SECONDS)
+        val delay = getSchedulingDelay()
+        scheduledService.scheduleWithFixedDelay(task, delay, delay, TimeUnit.SECONDS)
         isRunning.set(true)
     }
 
@@ -126,6 +133,7 @@ object OrderScheduler {
      */
     class SendCoordsTask : Runnable {
         override fun run() {
+            val serialNum = serialNum.incrementAndGet()
             val location: Location? = getLastLocation(MainActivity.context, MapActivity.mGoogleApiClient)
             location?.let { it ->
                 isRunning.set(true)
@@ -133,7 +141,7 @@ object OrderScheduler {
                     driverId = userModel.userId
                     currentOrderId?.let {
                         orderId = currentOrderId
-                        serialNumber = serialNum.incrementAndGet()
+                        serialNumber = serialNum
                     }
                     geoPoint = RoutePointRequest.GeoPoint().apply {
                         latitude = location.latitude.toFloat()

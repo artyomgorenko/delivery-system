@@ -57,6 +57,7 @@ class OrderActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_orders)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_order)
         binding.setVariable(BR.order, orderModel.orderData)
@@ -68,6 +69,7 @@ class OrderActivity : AppCompatActivity() {
 
         checkPermissionsState()
         setupMap()
+        recreateMapView()
 
         var departmentPoint = GeoPoint(45.0339, 39.0978)
         var destinationPoint = GeoPoint(45.05, 39.0998)
@@ -79,6 +81,16 @@ class OrderActivity : AppCompatActivity() {
         mapController.addWarehouseMarker(departmentPoint)
         mapController.addEndpointMarker(destinationPoint)
         mapView.controller.setCenter(destinationPoint)
+    }
+
+    private fun recreateMapView() {
+        if (mapView.context == null || mapView.context.resources == null) {
+            finish()
+            overridePendingTransition(0, 0) // @HINT: hides blink after recreate method
+            startActivity(intent)
+            overridePendingTransition(0, 0)
+            Log.i("OrderActivity", "MapView recreated to avoid NPE")
+        }
     }
 
     private fun checkPermissionsState() {
@@ -180,9 +192,9 @@ class OrderActivity : AppCompatActivity() {
 
     fun getOrderInWork(orderId: Int) {
         val context = this
-        changeOrderStatus(orderId, "IN_PROGRESS", object : Callback {
+        changeOrderStatus(orderId, "PRODUCT_PICKING", object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Toast.makeText(context, "Request failed", Toast.LENGTH_SHORT).show()
+                runOnUiThread { Toast.makeText(context, "Request failed. ${e.message}", Toast.LENGTH_SHORT).show() }
             }
 
             override fun onResponse(call: Call, response: Response) {
