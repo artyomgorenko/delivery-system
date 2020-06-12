@@ -1,6 +1,7 @@
 package ru.delivery.system.dao;
 
 import ru.delivery.system.common.enums.OrderStatus;
+import ru.delivery.system.common.enums.ProductStatus;
 import ru.delivery.system.model.entities.*;
 import ru.delivery.system.model.json.order.OrderIncoming;
 
@@ -22,6 +23,10 @@ public class OrderManager {
     private TransportManager transportManager;
     @EJB
     private ProductManager productManager;
+    @EJB
+    private CargoManager cargoManager;
+    @EJB
+    private MovementsManager movementsManager;
 
     @PersistenceContext(name = "PostgresDS")
     private EntityManager em;
@@ -62,12 +67,16 @@ public class OrderManager {
 
         // Order details
         for (OrderIncoming.Product product : orderIncoming.getProductList()) {
-            ProductEntity productEntity = productManager.getProductById(product.getProductId());
-            if (productEntity != null) {
+            // Резервируем товары
+            List<CargoEntity> productsEntities =
+                    cargoManager.getCargosForReserve(product.getProductId(), product.getCount());
+            // Создаем детали заказа
+            for (CargoEntity cargoEntity : productsEntities) {
+                movementsManager.makeMovement(cargoEntity, ProductStatus.REZERVED);
                 OrderDetailsEntity orderDetailsEntity = new OrderDetailsEntity();
-                orderDetailsEntity.setProduct(productEntity);
+                orderDetailsEntity.setProduct(cargoEntity);
                 orderDetailsEntity.setOrder(orderEntity);
-                orderDetailsEntity.setCount(product.getCount());
+//                orderDetailsEntity.setCount(product.getCount());
                 em.persist(orderDetailsEntity);
             }
         }
@@ -112,6 +121,15 @@ public class OrderManager {
         return em.createQuery("select o from OrderEntity o " +
                 "where o.user=:user", OrderEntity.class)
                 .setParameter("user", user)
+                .getResultList();
+    }
+
+    @TransactionAttribute
+    public List<Integer> getCargoOrdersIds(CargoEntity cargoEntity) {
+        return em.createQuery("select o.id from OrderEntity o " +
+                "join  o.orderDetails od " +
+                "where od.product.id=:cargoPid", Integer.class)
+                .setParameter("cargoPid", cargoEntity.getPId())
                 .getResultList();
     }
 

@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
 
 /**
  * Строка заказа
@@ -40,5 +39,5 @@ public class OrderDetailsEntity {
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "od_product_id", referencedColumnName = "p_id")
     @Getter @Setter
-    private ProductEntity product;
+    private CargoEntity product;
 }

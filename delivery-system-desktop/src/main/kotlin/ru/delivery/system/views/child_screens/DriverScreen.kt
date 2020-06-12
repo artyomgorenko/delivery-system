@@ -10,7 +10,7 @@ import tornadofx.*
 /**
  * Screen with driver information and statistics
  */
-class DriverScreen : View("Driver info") {
+class DriverScreen : View("Пользователи") {
     override val root = borderpane {
         top(ChildScreenHeader::class)
         center(DriverViewMain::class)
@@ -39,7 +39,6 @@ class DriverViewMain : View() {
     }
 
     override val root = borderpane {
-        top(ChildScreenHeader::class)
         center {
             tableview(orders) {
                 column(ORDER_ID_COLUMN, Order::orderIdProperty)
@@ -58,7 +57,11 @@ class DriverViewMain : View() {
         right {
             vbox {
                 form {
-                    fieldset("Редактирование заказа") {
+                    fieldset("Редактирование информации пользователя") {
+//                        borderpane {
+//                            center {imageview("d_logo.png")}
+//                        }
+
                         field(ORDER_ID_COLUMN) {
                             textfield(model.orderId)
                         }

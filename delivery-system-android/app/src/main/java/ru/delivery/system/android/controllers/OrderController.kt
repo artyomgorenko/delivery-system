@@ -83,7 +83,7 @@ object OrderScheduler {
 
     private fun getSchedulingDelay() : Long {
         val prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.context)
-        return prefs.getLong("sync_frequency_s", 10)
+        return prefs.getString("sync_frequency_s", "10")!!.toLong()
     }
 
     fun runScheduling() {

@@ -1,6 +1,7 @@
 package ru.delivery.system.views.common
 
 import javafx.beans.property.SimpleObjectProperty
+import javafx.scene.paint.Color
 import ru.delivery.system.common.ColorConstatnts
 import ru.delivery.system.common.navigateToLeft
 import ru.delivery.system.controllers.LoginController
@@ -37,10 +38,10 @@ class MainScreenHeader : View() {
             }
             right {
                 hbox {
-                    label("Logged as:") {
+                    label("Авторизирован как: user123") {
                         userName.onChange { text = "Logged as: $it"}
                     }
-                    button("Sing out").action(loginController::logout)
+                    button("Выйти").action(loginController::logout)
                 }
             }
         }

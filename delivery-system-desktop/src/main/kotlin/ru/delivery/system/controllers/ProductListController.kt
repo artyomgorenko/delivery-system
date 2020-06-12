@@ -4,7 +4,7 @@ import ru.delivery.system.common.JsonSerializer
 import ru.delivery.system.models.json.ProductListEntity
 import ru.delivery.system.rest.HttpHelper
 
-object PorductListController {
+object ProductListController {
 
     private val httpHelper = HttpHelper
     private val jsonSerializer = JsonSerializer()

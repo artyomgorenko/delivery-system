@@ -21,6 +21,8 @@
         <class>ru.delivery.system.common.MapRoutePointEntity</class>
         <class>ru.delivery.system.model.entities.StockentryEntity</class>
         <class>ru.delivery.system.model.entities.WarehouseEntity</class>
+        <class>ru.delivery.system.model.entities.CargoEntity</class>
+        <class>ru.delivery.system.model.entities.MovementsEntity</class>
         <properties>
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />

@@ -8,7 +8,7 @@ import ru.delivery.system.rest.HttpHelper
 import ru.delivery.system.views.common.ChildScreenHeader
 import tornadofx.*
 
-class ProductScreen : View("Заказы") {
+class ProductScreen : View("Товары") {
 
     companion object {
         const val PRODUCT_ID_COLUMN = "Номер заказа"
@@ -25,7 +25,7 @@ class ProductScreen : View("Заказы") {
     private val model = ProductModel(Product())
 
     override fun onDock() {
-        val response = HttpHelper.syncGet("product/productList")
+        val response = HttpHelper.syncGet("productId/productList")
         if (response.isSuccessful) {
             response.body()?.let { body ->
                 val productListEntity = JsonSerializer().toEntity<ProductListEntity>(body.string())

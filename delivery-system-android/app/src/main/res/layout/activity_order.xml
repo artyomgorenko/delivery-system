@@ -20,35 +20,41 @@
             android:id="@+id/orderIdTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:padding="12dp"
             android:textStyle="bold"
-            android:text="@{`Номер заказа: ` + Integer.toString(order.id)}"
-            tools:text="OrderId" />
+            android:textColor="@color/colorPrimaryDark"
+            android:text="@{`Номер заказа: 00` + Integer.toString(order.id)}"
+            tools:text="Номер заказа: 0031" />
 
         <TextView
             android:id="@+id/orderDescriptionTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:padding="12dp"
             android:textStyle="bold"
-            android:text="@{`Описание: ` + order.description}"
-            tools:text="Description" />
+            android:textColor="@color/colorPrimaryDark"
+            android:text="Описание:\nСрочная доставка, объёмный груз \nМинимальный объём кузова: 9 м3\nМинимальная грузоподъёмность: 1500 кг"
+            tools:text="Описание:\nСрочная доставка, объёмный груз \nМинимальный объём кузова: 9 м3\nМинимальная грузоподъёмность: 1500 кг" />
+        <!--TODO: android:text="@{`Описание: ` + order.description}"-->
 
         <TextView
             android:id="@+id/orderDepartmentTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:padding="12dp"
             android:textStyle="bold"
+            android:textColor="@color/colorPrimaryDark"
             android:text="@{`Адрес склада: ` + order.departmentAddress}"
-            tools:text="Department: Краснодар, Уральская 112" />
+            tools:text="Адрес склада: Краснодар, Уральская 112" />
 
         <TextView
             android:id="@+id/orderDestinationTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:padding="12dp"
             android:textStyle="bold"
+            android:textColor="@color/colorPrimaryDark"
+
             android:text="@{`Адрес доставки: ` + order.destinationAddress}"
             tools:text="Destination: Краснодар, Уральская 112" />
 
@@ -56,11 +62,13 @@
             android:id="@+id/orderDeliveryTimeTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:padding="12dp"
             android:textStyle="bold"
-            android:text="@{`Время доставки: ` + order.deliveryTime}"
-            tools:text="Delivery time: 12:00" />
+            android:textColor="@color/colorPrimaryDark"
 
+            android:text="Время доставки: 10:00 - 12:00"
+            tools:text="Время доставки: 10:00 - 12:00" />
+        <!--TODO: android:text="@{`Время доставки: ` + order.deliveryTime}"-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="283dp"
@@ -80,13 +88,14 @@
 
             <Button
                 android:id="@+id/getInWorkButton"
+                android:background="@drawable/border"
+
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentBottom="true"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginStart="0dp"
-                android:layout_marginBottom="6dp"
                 android:text="ВЗЯТЬ В РАБОТУ"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

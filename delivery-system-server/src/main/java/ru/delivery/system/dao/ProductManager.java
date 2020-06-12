@@ -20,6 +20,12 @@ public class ProductManager {
                 .getSingleResult();
     }
 
+    public ProductEntity getProductRecordById(Integer productId) {
+        return em.createQuery("select o from CargoEntity o where o.id = :productId", ProductEntity.class)
+                .setParameter("productId", productId)
+                .getSingleResult();
+    }
+
 
     public List<ProductEntity> getProductList() {
         return em.createQuery("select p from ProductEntity p", ProductEntity.class).getResultList();

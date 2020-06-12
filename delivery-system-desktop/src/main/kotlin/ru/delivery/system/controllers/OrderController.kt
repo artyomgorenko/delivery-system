@@ -1,5 +1,6 @@
 package ru.delivery.system.controllers
 
+import okhttp3.Response
 import ru.delivery.system.common.JsonSerializer
 import ru.delivery.system.models.json.OrderCreateRequest
 import ru.delivery.system.models.json.OrderCreateResponse
@@ -39,10 +40,12 @@ class OrderController : Controller() {
         var orderId: Int? = null
         try {
             val response = httpHelper.syncPost("order/addOrder", jsonSerializer.toJson(orderInfo))
-            if (response.isSuccessful) {
-                response.body()?.let { body ->
-                    val respEntity = jsonSerializer.toEntity<OrderCreateResponse>(body.string())
-                    orderId = respEntity.orderId
+            response.use { resp ->
+                if (resp.isSuccessful) {
+                    resp.body()?.let { body ->
+                        val respEntity = jsonSerializer.toEntity<OrderCreateResponse>(body.string())
+                        orderId = respEntity.orderId
+                    }
                 }
             }
         } catch (e: Exception) {

@@ -1,5 +1,6 @@
 package ru.delivery.system.views.child_screens
 
+import javafx.beans.property.SimpleStringProperty
 import ru.delivery.system.controllers.OrderListController
 import ru.delivery.system.models.viewmodels.Order
 import ru.delivery.system.models.viewmodels.OrderModel
@@ -17,8 +18,13 @@ class OrderScreen : View("Заказы") {
     }
 
     private var orders = OrderListController.gerOrderList().observable()
-    private var orderProductList = listOf("Product#1, Product#2").observable()
+    private var orderProductList = listOf(
+        SimpleStringProperty("Product#1"),
+        SimpleStringProperty("Product#2")
+    ).observable()
     private val model = OrderModel(Order())
+
+
 
     override fun onDock() {
         orders.clear()
@@ -72,10 +78,23 @@ class OrderScreen : View("Заказы") {
                             model.rollback()
                         }
                     }
+
+                    data class TempProduct(val name:String, val count:String)
+                    val tempProductList = listOf(
+                        TempProduct("Product #1", "2"),
+                        TempProduct("Product #2", "3"),
+                        TempProduct("Product #4", "1")
+                    ).observable()
                     fieldset("Список товаров") {
-                        tableview(orderProductList) {
-                            column("Название", String::toString)
+                        tableview(tempProductList/*orderProductList*/) {
+                            column("Название", SimpleStringProperty::getValue)
+                            column("Количество", SimpleStringProperty::getValue)
                         }
+                    }
+                    hbox {
+                        spacingProperty().set(5.0)
+                        button("Создать ТТН")
+                        button("Создать Путевой лист")
                     }
                 }
             }
@@ -98,4 +117,3 @@ class OrderScreen : View("Заказы") {
         println("Saving ${order.orderId} / ${order.status}")
     }
 }
-

@@ -42,7 +42,7 @@ class Order {
     var track by trackProperty
 }
 
-class OrderModel(val order: Order) : ItemViewModel<Order>() {
+class OrderModel(val order: Order) : ItemViewModel<Order>(order) {
     val orderId = bind(Order::orderIdProperty)
     val productId = bind(Order::productIdProperty)
     val status = bind(Order::statusProperty)

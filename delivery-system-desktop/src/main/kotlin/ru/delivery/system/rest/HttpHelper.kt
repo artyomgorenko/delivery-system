@@ -3,6 +3,8 @@ package ru.delivery.system.rest
 //import io.github.rybalkinsd.kohttp.dsl.httpGet
 //import io.github.rybalkinsd.kohttp.dsl.httpPost
 import okhttp3.*
+import ru.delivery.system.common.JsonSerializer
+import java.lang.Exception
 
 object HttpHelper {
 
@@ -56,6 +58,25 @@ object HttpHelper {
             builder.add(pair.key.toString(), pair.value.toString())
         }
         return builder.build()
+    }
+
+    // TODO: перевести http запросы в android и desktop на эту функцию
+    private fun syncGet(
+        url: String,
+        onSuccess: (response: Response) -> Unit,
+        onError: (response: Response?, e: Exception) -> Unit
+    ) {
+        var response: Response? = null
+        try {
+            response = syncGet(url)
+            response.use {
+                if (response.isSuccessful) {
+                    onSuccess(response)
+                }
+            }
+        } catch (e: Exception) {
+            onError(response, e)
+        }
     }
 
 }

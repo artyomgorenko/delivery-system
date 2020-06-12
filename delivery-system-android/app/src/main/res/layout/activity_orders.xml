@@ -25,6 +25,7 @@
                 android:layout_height="400dp"
                 android:orientation="vertical"
                 app:entries="@{orders}"
+
                 app:layout="@{@layout/item}" />
         </ScrollView>
 
@@ -33,6 +34,8 @@
             android:layout_height="match_parent">
 
             <Button
+                android:background="@drawable/border"
+
                 android:id="@+id/updateOrdersList"
                 android:layout_width="256dp"
                 android:layout_height="51dp"
@@ -41,13 +44,13 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
-                android:drawableRight="@drawable/ic_update_gray_24dp"
-                android:text="        ОБНОВИТЬ"
+                android:text="ОБНОВИТЬ"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </android.support.constraint.ConstraintLayout>
     </LinearLayout>
+    <!--android:drawableRight="@drawable/ic_update_gray_24dp"-->
 
 </layout>

@@ -69,6 +69,7 @@ object OrderListController {
         Platform.runLater {
             filteredOrders.clear()
             filteredOrders.addAll(values)
+            filteredOrders.sortBy {it.orderId  }
 
             // remove it
 //            if (filteredOrders.isEmpty()) {

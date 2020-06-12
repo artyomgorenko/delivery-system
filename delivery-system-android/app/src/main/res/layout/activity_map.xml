@@ -11,19 +11,19 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="552dp"
+            android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent">
 
             <org.osmdroid.views.MapView
                 android:id="@+id/map"
                 android:layout_width="fill_parent"
-                android:layout_height="530dp" />
+                android:layout_height="505dp" />
         </LinearLayout>
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/constraintLayout"
             android:layout_width="409dp"
-            android:layout_height="70dp"
+            android:layout_height="97dp"
             app:layout_constraintBottom_toBottomOf="parent">
 
             <TextView
@@ -35,26 +35,44 @@
                 android:layout_alignParentBottom="true"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
-                android:text="Large Text"
+                android:text=""
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.434"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="1.0" />
 
             <Button
                 android:id="@+id/finishOrderButton"
                 android:layout_width="171dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="52dp"
+                android:layout_marginEnd="56dp"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/background_border_focused"
                 android:text="Начать отгрузку"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="1.0" />
+                app:layout_constraintVertical_bias="0.0" />
+
+            <Button
+                android:id="@+id/cancelOrderButton"
+                android:layout_width="171dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="228dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/background_border_focused"
+                android:text="Отменить заказ"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
         </android.support.constraint.ConstraintLayout>
     </android.support.constraint.ConstraintLayout>
 

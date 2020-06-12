@@ -40,12 +40,11 @@ import org.osmdroid.views.CustomZoomButtonsController
 import ru.delivery.system.android.controllers.OrderScheduler
 import ru.delivery.system.android.controllers.OsmMapController
 import ru.delivery.system.android.models.OrderModel
+import ru.delivery.system.android.models.OrderStatus.CANCELED_STATUS
 import ru.delivery.system.android.models.json.OrderStatusResponse
-import ru.delivery.system.android.utils.JsonSerializer
-import ru.delivery.system.android.utils.changeOrderStatus
-import ru.delivery.system.android.utils.getLastLocation
-import ru.delivery.system.android.utils.toast
+import ru.delivery.system.android.utils.*
 import java.io.IOException
+import java.text.DateFormat
 import java.util.*
 
 
@@ -56,6 +55,8 @@ class MapActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
     private lateinit var mapView: MapView
     private val MULTIPLE_PERMISSION_REQUEST_CODE = 4
     private var mLastLocation: Location? = null
+    private lateinit var orderControlBtn: Button
+    private lateinit var cancelOrderBtn: Button
     private lateinit var mapController: OsmMapController
 
     companion object {
@@ -68,35 +69,69 @@ class MapActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val orderControlButton = findViewById<Button>(R.id.finishOrderButton)
+        orderControlBtn = orderControlButton
+        cancelOrderBtn = cancelOrderButton
+        cancelOrderBtn.isEnabled = false
         orderControlButton.tag = 0
         title = "Получение товаров"
         orderControlButton.text = "Начать отгрузку"
 
-        orderControlButton.setOnClickListener { view ->
-            OrderModel.orderData?.let {
-                if (view.tag == 0) {
-                    startProductShipment()
+//        orderControlButton.invalidate()
 
-                    orderControlButton.tag = 1
-                    orderControlButton.text = "Завершить отгрузку"
-                    title = "Отгрузка товара"
+//        orderControlButton.setOnClickListener { view ->
+//            OrderModel.orderData?.let {
+//                if (view.tag == 0) {//Начать отгрузку
+//                    val call = startProductShipment().execute().get()
+//                    while (!call.isExecuted) {}
+//                    if (OrderModel.status == SHIPMENT_STATUS) {
+//                        orderControlButton.tag = 1
+//                        orderControlButton.text = "Завершить отгрузку"
+//                        title = "Отгрузка товара"
+//                    }
+//                }
+//                else if (view.tag == 1) {//Завершить отгрузку
+//                    val call = startDelivering().execute().get()
+//                    while (!call.isExecuted) {}
+//                    if (OrderModel.status == DELIVERING_STATUS) {
+//                        orderControlButton.tag = 2
+//                        orderControlButton.text = "Завершить доставку"
+//                        title = "Доставка товара"
+//                    }
+//                }
+//                else if (view.tag == 2) {//Завершить доставку
+//                    val call = finishOrder().execute().get()
+//                    while (!call.isExecuted) {}
+//                    if (OrderModel.status == DONE_STATUS) {
+//                        orderControlButton.tag = 0
+//                        orderControlButton.text = "Начать отгрузку"
+//                        title = "Получение товаров"
+//                    }
+//                } else {}
+//            }
+//        }
+        orderControlButton.setOnClickListener { view ->
+            if (OrderModel.orderData != null) {
+                if (view.tag == 0) {//Начать отгрузку
+                    orderControlBtn.isEnabled = false
+                    startProductShipment().execute().get()
                 }
-                else if (view.tag == 1) {
-//                    orderControlButton.text = "Завершить отгрузку"
-//                    title = "Отгрузка товара"
-                    startDelivering()
-                    orderControlButton.tag = 2
-                    orderControlButton.text = "Завершить доставку"
-                    title = "Доставка товара"
+                else if (view.tag == 1) {//Завершить отгрузку
+                    orderControlBtn.isEnabled = false
+                    startDelivering().execute().get()
                 }
-                else if (view.tag == 2) {
-//                    orderControlButton.text = "Завершить доставку"
-//                    title = "Доставка товара"
-                    finishOrder()
-                    orderControlButton.tag = 0
-                    orderControlButton.text = "Начать отгрузку"
-                    title = "Получение товаров"
+                else if (view.tag == 2) {//Завершить доставку
+                    orderControlBtn.isEnabled = false
+                    finishOrder().execute().get()
                 }
+            } else {
+                showDialog(this, "Нельзя начать отгрузку", "Нет активного заказа в работе")
+            }
+        }
+
+        cancelOrderButton.setOnClickListener { _ ->
+            OrderModel.orderData?.let {
+                cancelOrderBtn.isEnabled = false
+                cancelOrder()
             }
         }
 
@@ -216,8 +251,8 @@ class MapActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
                 val longitudeFormattedStr = longitudeStr.substring(0, Math.min(longitudeStr.length, 7))
 
                 Log.i("zoom", "" + mapView.mapCenter.latitude + ", " + mapView.mapCenter.longitude)
-                val latLongTv = findViewById<TextView>(R.id.textView)
-                latLongTv.text = "$latitudeFormattedStr, $longitudeFormattedStr"
+//                val latLongTv = findViewById<TextView>(R.id.textView)
+//                latLongTv.text = "$latitudeFormattedStr, $longitudeFormattedStr"
                 return true
             }
 
@@ -231,8 +266,8 @@ class MapActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
                 val longitudeFormattedStr = longitudeStr.substring(0, Math.min(longitudeStr.length, 7))
 
                 Log.i("scroll", "" + mapView.mapCenter.latitude + ", " + mapView.mapCenter.longitude)
-                val latLongTv = findViewById<TextView>(R.id.textView)
-                latLongTv.text = "$latitudeFormattedStr, $longitudeFormattedStr"
+//                val latLongTv = findViewById<TextView>(R.id.textView)
+//                latLongTv.text = "$latitudeFormattedStr, $longitudeFormattedStr"
                 return true
             }
         }, 1000))
@@ -329,18 +364,18 @@ class MapActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
     /*LocationListener implementation*/
     override fun onLocationChanged(location: Location?) {
         // May changed by finishOrder()
-        if (OrderModel.deliveryStatus == "FINISHED") return
+        if (OrderModel.status == "FINISHED") return
 
         mLastLocation = location
 
         OrderModel.orderData?.let { orderData ->
             val distanceInMeters = GeoPoint(mLastLocation!!).distanceToAsDouble(orderData.departmentPoint)
             if (distanceInMeters < 50) {
-                OrderModel.deliveryStatus = "DELIVERING"
+                OrderModel.status = "DELIVERING"
             }
 
             // Отображаем путь через 3 либо через 2 точки
-            if (OrderModel.deliveryStatus == "DELIVERING") {
+            if (OrderModel.status == "DELIVERING") {
                 mapController.calculateAndDisplyRoute(
                     orderData.departmentPoint,
                     orderData.destinationPoint
@@ -369,147 +404,239 @@ class MapActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
     override fun onProviderEnabled(provider: String?) {
     }
 
-    override fun onProviderDisabled(provider: String?) {
+    override fun onProviderDisabled(proштvider: String?) {
     }
 
     /**
      * Отправляет запрос на завершение заказа на сервер.
      * В случае успешного ответа, очищает OrderModel и останавливает отслеживание заказа
      */
-    private fun finishOrder() {
-        OrderModel.orderData?.let {
-            val orderId: Int = it.id
-            val context = this
-            return changeOrderStatus(orderId, "DONE", object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    runOnUiThread { Toast.makeText(context, "Request failed", Toast.LENGTH_SHORT).show() }
-                }
+    private fun finishOrder(): AsyncTask<Void, Void, Call> {
+        val orderId: Int = OrderModel.orderData!!.id
+        val context = this
+        return changeOrderStatusTask(orderId, "DONE", object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { Toast.makeText(context, "Request failed", Toast.LENGTH_SHORT).show() }
+            }
 
-                override fun onResponse(call: Call, response: Response) {
-                    if (response.isSuccessful) {
-                        response.body()?.let { body ->
-                            val orderStatusResponse = JsonSerializer().toEntity<OrderStatusResponse>(body.string())
-                            if (orderStatusResponse.header.resultCode == 0) {
-                                OrderModel.clearModel()
-                                OrderScheduler.stopOrderTracking()
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    response.body()?.let { body ->
+                        val orderStatusResponse = JsonSerializer().toEntity<OrderStatusResponse>(body.string())
+                        if (orderStatusResponse.header.resultCode == 0) {
+                            if (OrderModel.status == CANCELED_STATUS) {
+                                OrderModel.finishOrder()
                                 val orderInfo = orderStatusResponse.body
-                                runOnUiThread { toast(context, "Заказ завершен") }
-                                val dialogBuilder = AlertDialog.Builder(context, android.R.style.Theme_Material_Light_Dialog_Alert)
-                                dialogBuilder
-                                    .setMessage("""
-                                            Заказ взят в работу в ${orderInfo.startDate}
-                                            Отгрузка товаров со начата в ${orderInfo.startShipmentDate}
-                                            Товар отгружен со склада в ${orderInfo.startDeliveringDate}
-                                            Товар доставлен заказчику в ${orderInfo.doneDate}
-                                            Общий путь составил ${orderInfo.deliveryRouteLength}
+                                showDialog(context, "Заказ № $orderId отменён",
+                                    """
+                                    Заказ взят в работу в:
+                                    ${formatDate(orderInfo.startDate)}
+                                    Отгрузка товаров начата в:
+                                    ${formatDate(orderInfo.startShipmentDate)}
+                                    Товар отгружен со склада в:
+                                    ${formatDate(orderInfo.startDeliveringDate)}
+                                    Заказ завершен в:
+                                    ${formatDate(orderInfo.doneDate)}
 
-                                            Конечная стоимость доставки ${orderInfo.totalCost}
-                                        """.trimIndent()
-                                    )
-                                    .setCancelable(false)
-                                    .setPositiveButton("Ок") { dialog, _ -> dialog.cancel() }
-//                                    .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
-                                //.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+                                    Общий путь составил ${orderInfo.deliveryRouteLength ?: 1.toString()} м.
+
+                                    Конечная стоимость доставки: ${"%.2f".format(orderInfo.totalCost)} руб.
+                                """.trimIndent())
+                                finishOrder()
                                 runOnUiThread {
-                                    val alert = dialogBuilder.create()
-                                    alert.setTitle("Заказ № $orderId завершен")
-                                    alert.show()
-                                }
-                            } else {
-                                runOnUiThread {
-                                    toast(
-                                        context,
-                                        "Заказ не может быть завершен:\n" + "${orderStatusResponse.header.message}"
-                                    )
+                                    orderControlBtn.isEnabled = true
+                                    cancelOrderBtn.isEnabled = true
+                                    cancelOrderBtn.invalidate()
+                                    orderControlBtn.tag = 2
+                                    orderControlBtn.text = "Завершить доставку"
+                                    title = "Доставка"
+                                    val latLongTv = findViewById<TextView>(R.id.textView)
+                                    latLongTv.text = "Доставьте товары"
                                 }
                             }
+                            else {
+                                OrderModel.clearModel()
+                                OrderModel.finishOrder()
+                                OrderScheduler.stopOrderTracking()
+                                val orderInfo = orderStatusResponse.body
+                                showDialog(context, "Заказ № $orderId завершен",
+                                    """
+                                    Заказ взят в работу в:
+                                    ${formatDate(orderInfo.startDate)}
+                                    Отгрузка товаров начата в:
+                                    ${formatDate(orderInfo.startShipmentDate)}
+                                    Товар отгружен со склада в:
+                                    ${formatDate(orderInfo.startDeliveringDate)}
+                                    Заказ завершен в:
+                                    ${formatDate(orderInfo.doneDate)}
+
+                                    Общий путь составил ${orderInfo.deliveryRouteLength ?: 1.toString()} м.
+                                    Расход топлива составил ${orderInfo.deliveryRouteLength ?: (0.108).toString() } л.
+
+                                    Конечная стоимость доставки: ${"%.2f".format(orderInfo.totalCost)} руб.
+                                """.trimIndent())
+                                runOnUiThread {
+                                    orderControlBtn.isEnabled = true
+                                    orderControlBtn.tag = 0
+                                    orderControlBtn.text = "Начать отгрузку"
+                                    title = "Получение товаров"
+                                    val latLongTv = findViewById<TextView>(R.id.textView)
+                                    latLongTv.text = "Доберитесь на склад"
+                                }
+                            }
+                        } else {
+                            showDialog(context, "Заказ не может быть завершен", "${orderStatusResponse.header.message}")
                         }
                     }
                 }
-            })
-        }
+            }
+        })
     }
 
-    private fun showDialog (context: Context, title: String, message: String) {
-        val dialogBuilder = AlertDialog.Builder(context, android.R.style.Theme_Material_Light_Dialog_Alert)
-        dialogBuilder
-            .setMessage(message)
-            .setCancelable(false)
-            .setPositiveButton("Ок") { dialog, _ -> dialog.cancel() }
-//            .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
-        runOnUiThread {
-            val alert = dialogBuilder.create()
-            alert.setTitle(title)
-            alert.show()
-        }
-    }
+    private fun formatDate(date: Date?) =
+        DateFormat.getDateInstance(DateFormat.LONG).format(date) + " " + DateFormat.getTimeInstance().format(date)
 
     /**
      * Запрос на начало отгрузки товара
      */
-    private fun startProductShipment() {
-        OrderModel.orderData?.let {
-            val orderId: Int = it.id
-            val context = this
-            return changeOrderStatus(orderId, "PRODUCT_SHIPMENT", object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    runOnUiThread { Toast.makeText(context, "Request failed", Toast.LENGTH_SHORT).show() }
-                }
+    @SuppressLint("StaticFieldLeak")
+    private fun startProductShipment(): AsyncTask<Void, Void, Call> {
+        val context = this
+        val orderId: Int = OrderModel.orderData!!.id
+        return changeOrderStatusTask(orderId, "PRODUCT_SHIPMENT", object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { Toast.makeText(context, "Request failed", Toast.LENGTH_SHORT).show() }
+            }
 
-                override fun onResponse(call: Call, response: Response) {
-                    if (response.isSuccessful) {
-                        response.body()?.let { body ->
-                            val orderStatusResponse = JsonSerializer().toEntity<OrderStatusResponse>(body.string())
-                            if (orderStatusResponse.header.resultCode == 0) {
-                                runOnUiThread { toast(context, "Начата отгрузка товаров") }
-                            } else {
-                                runOnUiThread {
-                                    toast(context, "Заказ не может быть взят в работу:\n" + "${orderStatusResponse.header.message}")
-                                }
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    response.body()?.let { body ->
+                        val orderStatusResponse = JsonSerializer().toEntity<OrderStatusResponse>(body.string())
+                        if (orderStatusResponse.header.resultCode == 0) {
+                            OrderModel.startProductsShipment()
+                            showDialog(context, "Начат процесс отгрузки товаров", """
+                                Время начала отгрузки:
+                                ${formatDate(Date())}
+                            """.trimIndent())
+                            runOnUiThread {
+                                orderControlBtn.isEnabled = true
+                                orderControlBtn.tag = 1
+                                orderControlBtn.text = "Завершить отгрузку"
+                                title = "Отгрузка товара"
+                                val latLongTv = findViewById<TextView>(R.id.textView)
+                                latLongTv.text = "Отгрузите товары"
+                            }
+                        } else {
+                            runOnUiThread {
+                                showDialog(
+                                    context,
+                                    "Заказ не может быть взят в работу",
+                                    "${orderStatusResponse.header.message}"
+                                )
                             }
                         }
-                    } else {
-                        runOnUiThread { toast(context, "Начата отгрузка товаров") }
                     }
+                } else {
+                    runOnUiThread { toast(context, "Bad response.") }
                 }
-            })
-        }
+            }
+        })
     }
 
     /**
      * Запрос на начало доставки товара
      */
-    private fun startDelivering() {
-        OrderModel.orderData?.let {
-            val orderId: Int = it.id
-            val context = this
-            return changeOrderStatus(orderId, "DELIVERING", object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    runOnUiThread { Toast.makeText(context, "Request failed", Toast.LENGTH_SHORT).show() }
-                }
+    private fun startDelivering(): AsyncTask<Void, Void, Call> {
+        val orderId: Int = OrderModel.orderData!!.id
+        val context = this
+        return changeOrderStatusTask(orderId, "DELIVERING", object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { Toast.makeText(context, "Request failed", Toast.LENGTH_SHORT).show() }
+            }
 
-                override fun onResponse(call: Call, response: Response) {
-                    if (response.isSuccessful) {
-                        response.body()?.let { body ->
-                            val orderStatusResponse = JsonSerializer().toEntity<OrderStatusResponse>(body.string())
-                            if (orderStatusResponse.header.resultCode == 0) {
-                                startProductShipment()
-                                showDialog(context, "Подтвердите отгрузку товаров", """
-//                                    ${OrderModel.orderData}
-                                    Product#1 - 3 шт.
-                                    Product#2 - 4 шт.
-                                    Product#3 - 1 шт.
-                                """.trimIndent())
-                                runOnUiThread { toast(context, "Отгрузка товаров завершена") }
-                            } else {
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    response.body()?.let { body ->
+                        val orderStatusResponse = JsonSerializer().toEntity<OrderStatusResponse>(body.string())
+                        if (orderStatusResponse.header.resultCode == 0) {
+
+                                OrderModel.startDelivering()
+                                showDialog(
+                                    context, "Отгрузка товаров завершена", """
+                                Подтвердите отгрузку товаров:
+                                      Product#001 - 1 шт.
+                                      Product#003 - 2 шт.
+                                      Product#004 - 1 шт.
+                                """.trimIndent(),
+                                "Подтвердить")
                                 runOnUiThread {
-                                    toast(context, "Заказ не может быть взят в работу:\n" + "${orderStatusResponse.header.message}")
+                                    orderControlBtn.isEnabled = true
+                                    cancelOrderBtn.isEnabled = true
+                                    cancelOrderBtn.invalidate()
+                                    orderControlBtn.tag = 2
+                                    orderControlBtn.text = "Завершить доставку"
+                                    title = "Доставка товара"
+                                    val latLongTv = findViewById<TextView>(R.id.textView)
+                                    latLongTv.text = "Доставьте товары"
                                 }
-                            }
+                        } else {
+                            showDialog(context, "Товары не могут быть отгружены:", "${orderStatusResponse.header.message}")
                         }
                     }
                 }
-            })
+            }
+        })
+    }
+
+    /**
+     * Запрос на отмену заказа
+     */
+    private fun cancelOrder(): Call {
+        val orderId: Int = OrderModel.orderData!!.id
+        val context = this
+        return changeOrderStatus(orderId, "CANCELED", object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { Toast.makeText(context, "Request failed", Toast.LENGTH_SHORT).show() }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    response.body()?.let { body ->
+                        val orderStatusResponse = JsonSerializer().toEntity<OrderStatusResponse>(body.string())
+                        if (orderStatusResponse.header.resultCode == 0) {
+                            OrderModel.cancelOrder()
+                            showDialog(context, "Заказ отменён", """
+                                    Доставьте товары обратно на склад
+                                """.trimIndent())
+                            runOnUiThread {
+                                orderControlBtn.isEnabled = true
+                                title = "Возврат"
+                                orderControlBtn.tag = 1
+                                orderControlBtn.text = "Начать отгрузку"
+                                OrderModel.status = CANCELED_STATUS
+                                val latLongTv = findViewById<TextView>(R.id.textView)
+                                latLongTv.text = "Верните товары на склад"
+                            }
+                        } else {
+                            showDialog(context, "Заказ не может быть отменен", "${orderStatusResponse.header.message}")
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    private fun showDialog (context: Context, title: String, message: String, okButtonText: String = "Ok") {
+        val dialogBuilder = AlertDialog.Builder(context, android.R.style.Theme_Material_Light_Dialog_Alert)
+        dialogBuilder
+            .setMessage(message)
+            .setCancelable(false)
+            .setTitle(title)
+            .setPositiveButton(okButtonText) { dialog, _ -> dialog.cancel() }
+//            .setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+        runOnUiThread {
+            val alert = dialogBuilder.create()
+            alert.show()
         }
     }
 

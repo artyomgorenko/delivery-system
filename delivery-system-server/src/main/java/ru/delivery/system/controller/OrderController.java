@@ -1,6 +1,7 @@
 package ru.delivery.system.controller;
 
 import ru.delivery.system.common.enums.OrderStatus;
+import ru.delivery.system.common.enums.ProductStatus;
 import ru.delivery.system.dao.*;
 import ru.delivery.system.model.entities.*;
 import ru.delivery.system.model.json.RoutePointIncoming;
@@ -40,6 +41,8 @@ public class OrderController {
     private TransportManager transportManager;
     @EJB
     private StockentryManager stockentryManager;
+    @EJB
+    private MovementsManager movementsManager;
 
     @POST
     @Path("/addOrder")
@@ -168,7 +171,7 @@ public class OrderController {
         List<OrderInfoOutgoing.Product> productList = new ArrayList<>();
         for (OrderDetailsEntity orderDetail : orderEntity.getOrderDetails()) {
             OrderInfoOutgoing.Product product = new OrderInfoOutgoing.Product();
-            ProductEntity productEntity = orderDetail.getProduct();
+            ProductEntity productEntity = orderDetail.getProduct().getProduct();
             product.setProductId(productEntity.getId());
             product.setCount(orderDetail.getCount());
             product.setCost(productEntity.getCost());
@@ -231,33 +234,57 @@ public class OrderController {
                 respHeader.setMessage("Заказ взят в работу");
             }
             else if (OrderStatus.PRODUCT_SHIPMENT.isEqual(requestBody.getNewStatus())) {
-                if (!OrderStatus.PRODUCT_PICKING.isEqual(orderEntity.getStatus())) {
+                if (OrderStatus.PRODUCT_PICKING.isEqual(orderEntity.getStatus())) {
+                    orderEntity.setStatus(OrderStatus.PRODUCT_SHIPMENT.name());
+                    orderEntity.setStartShipmentDate(new Timestamp(new Date().getTime()));
+                } else if (OrderStatus.CANCELED.isEqual(orderEntity.getStatus())) {
+                    // Возврат после доставки. Переводим товары в статус ACTIVE
+                    for (OrderDetailsEntity orderDetail : orderEntity.getOrderDetails()) {
+                        movementsManager.makeMovement(orderDetail.getProduct(), ProductStatus.ACTIVE);
+                    }
+                } else {
                     error("Товар уже был отгружен, или заказ еще не взят в работу");
                 }
-                orderEntity.setStatus(OrderStatus.PRODUCT_SHIPMENT.name());
-                orderEntity.setStartShipmentDate(new Timestamp(new Date().getTime()));
+
             }
             else if (OrderStatus.DELIVERING.isEqual(requestBody.getNewStatus())) {
-                if (!OrderStatus.PRODUCT_SHIPMENT.isEqual(orderEntity.getStatus())) {
-                    error("Нельзя начать доставку. Неверный статус заказа");
-                }
-                orderEntity.setStatus(OrderStatus.DELIVERING.name());
-                orderEntity.setStartDeliveringDate(new Timestamp(new Date().getTime()));
+                if (OrderStatus.PRODUCT_SHIPMENT.isEqual(orderEntity.getStatus())) {
+                    orderEntity.setStatus(OrderStatus.DELIVERING.name());
+                    orderEntity.setStartDeliveringDate(new Timestamp(new Date().getTime()));
 
-                for (OrderDetailsEntity orderDetail : orderEntity.getOrderDetails()) {
-                    Integer productId = orderDetail.getProduct().getId();
-                    Integer warehouseId = orderDetail.getProduct().getId();
-                    stockentryManager.writeoffProduct(productId, warehouseId, orderDetail.getCount());
+                    for (OrderDetailsEntity orderDetail : orderEntity.getOrderDetails()) {
+
+                        // Меняем статус заказов на отгружены
+                        movementsManager.makeMovement(orderDetail.getProduct(), ProductStatus.OFFLOADED);
+
+                        // Пока без списания с остатков...
+//                    Integer productId = orderDetail.getProduct().getId();
+//                    Integer warehouseId = orderDetail.getProduct().getId();
+//                    stockentryManager.writeoffProduct(productId, warehouseId, orderDetail.getCount());
+                    }
+                } else if (OrderStatus.CANCELED.isEqual(orderEntity.getStatus())) {
+                    // Возврат после доставки. Переводим товары в статус ACTIVE
+                    for (OrderDetailsEntity orderDetail : orderEntity.getOrderDetails()) {
+                        movementsManager.makeMovement(orderDetail.getProduct(), ProductStatus.ACTIVE);
+                    }
+                } else {
+                    error("Нельзя начать доставку. Неверный статус заказа");
                 }
             }
             else if (OrderStatus.DONE.isEqual(requestBody.getNewStatus())) {
-                if (!OrderStatus.DELIVERING.isEqual(orderEntity.getStatus())) {
-                    error("Заказ не может быть завершен. Неверный статус(" + orderEntity.getStatus() + ")");
-                }
+//                if (!OrderStatus.DELIVERING.isEqual(orderEntity.getStatus()) ||
+//                    !OrderStatus.CANCELED.isEqual(orderEntity.getStatus())) {
+//                    error("Заказ не может быть завершен. Неверный статус(" + orderEntity.getStatus() + ")");
+//                }
                 orderEntity.setStatus(OrderStatus.DONE.name());
                 orderEntity.setDoneDate(new Timestamp(new Date().getTime()));
                 respBody.setDistanceInMeters(100F);
                 respBody.setDeliveryTimeMs(100L);
+
+                // Переводим товары в статус DONE
+                for (OrderDetailsEntity orderDetail : orderEntity.getOrderDetails()) {
+                    movementsManager.makeMovement(orderDetail.getProduct(), ProductStatus.DONE);
+                }
 
                 // Вычисление длины пути доставки
                 if (!orderEntity.getOrderMapRoutes().isEmpty()) {

@@ -64,10 +64,11 @@ class MapView : View() {
                         }
                     }
                     bottom {
-                        textarea("Type memo here") {
-                            isEditable = false
-                            selectAll()
-                        }
+                        // TODO: this may be a status bar
+//                        textarea("") {
+//                            isEditable = false
+//                            selectAll()
+//                        }
 
                     }
                 }
@@ -75,28 +76,29 @@ class MapView : View() {
 
             bottom {
                 hbox {
-                    button("Add marker").action { mapView.addMarker(LatLong(51.1, -0.2), "TEST MARKER", ColorMarker.BLACK_MARKER, 0) }
-                    button("Draw orderList route") {
-                        style {
-                            baseColor = Color.RED
-                        }
-                        var trackName: String? = null
-                        action {
-                            val response: Response = "http://localhost:8080/delivery-system/orderList/getOrderRoute?orderId=4".httpGet()
-                            if (response.isSuccessful) {
-                                response.body()?.string()?.let { json ->
-                                    mapView.clearMarkersAndTracks()
-                                    val orderRoute = JsonSerializer().toEntity<OrderRoute>(json)
-                                    val points = ArrayList<LatLong>()
-                                    orderRoute.routePoints?.forEach { point ->
-                                        val latLong = LatLong(point.geoPoint!!.latitude!!.toDouble(), point.geoPoint!!.longitude!!.toDouble())
-                                        points.add(latLong)
-                                    }
-//                                    trackName = mapView.addTrackWithMarkers(points, TrackColor.BLUE)
-                                }
-                            }
-                        }
-                    }
+                    //TODO: remove it?
+//                    button("Add marker").action { mapView.addMarker(LatLong(51.1, -0.2), "TEST MARKER", ColorMarker.BLACK_MARKER, 0) }
+//                    button("Draw orderList route") {
+//                        style {
+//                            baseColor = Color.RED
+//                        }
+//                        var trackName: String? = null
+//                        action {
+//                            val response: Response = "http://localhost:8080/delivery-system/orderList/getOrderRoute?orderId=4".httpGet()
+//                            if (response.isSuccessful) {
+//                                response.body()?.string()?.let { json ->
+//                                    mapView.clearMarkersAndTracks()
+//                                    val orderRoute = JsonSerializer().toEntity<OrderRoute>(json)
+//                                    val points = ArrayList<LatLong>()
+//                                    orderRoute.routePoints?.forEach { point ->
+//                                        val latLong = LatLong(point.geoPoint!!.latitude!!.toDouble(), point.geoPoint!!.longitude!!.toDouble())
+//                                        points.add(latLong)
+//                                    }
+////                                    trackName = mapView.addTrackWithMarkers(points, TrackColor.BLUE)
+//                                }
+//                            }
+//                        }
+//                    }
                 }
             }
         }
@@ -124,12 +126,14 @@ class OrderListView : View() {
                         button("Поиск").action { orderListController.findById(textField.text) }
                     }
                     field {
-                        checkbox("Done") { isSelected = true }
-                        checkbox("In progress") { isSelected = true }
+                        checkbox("Новые") { isSelected = true }
                     }
                     field {
-                        checkbox("Completed") { isSelected = true }
-                        checkbox("Canceled") { isSelected = true }
+                        checkbox("В работе") { isSelected = true }
+                    }
+                    field {
+                        checkbox("Завершённые") { isSelected = true }
+//                        checkbox("Canceled") { isSelected = true }
                     }
                 }
             }
@@ -139,7 +143,7 @@ class OrderListView : View() {
             scrollpane {
                 vbox {
                     children.bind(orderListController.filteredOrders) { order ->
-                        titledpane("Order# ${order.orderId}") {
+                        titledpane("Заказ #${order.orderId}") {
 
                             expandedProperty().addListener { _, _, new ->
                                 if (!new) {
@@ -154,10 +158,12 @@ class OrderListView : View() {
                             form {
                                 style {
                                     when (order.status) {
-                                        "IN_PROGRESS" -> backgroundColor += ColorConstatnts.ORDER_IN_PROGRESS
-                                        "DONE" -> backgroundColor += ColorConstatnts.ORDER_DONE
-                                        "CANCELED" -> backgroundColor += ColorConstatnts.ORDER_CANCELED
-                                        "NEW" -> backgroundColor += ColorConstatnts.ORDER_NEW
+                                        "PRODUCT_PICKING" -> backgroundColor += Color.LIGHTGOLDENRODYELLOW
+                                        "PRODUCT_SHIPMENT" -> backgroundColor += Color.GOLDENROD
+                                        "DELIVERING" -> backgroundColor += Color.LIGHTGREEN
+                                        "DONE" -> backgroundColor += Color.GREEN
+                                        "CANCELED" -> backgroundColor += Color.DARKGRAY
+                                        "NEW" -> backgroundColor += Color.WHITE
                                     }
                                 }
 
@@ -165,21 +171,27 @@ class OrderListView : View() {
                                     minWidth = 250.0
                                     maxWidth = 250.0
 
-                                    field(order.orderId.toString())
-                                    field("Products count: ${order.productList?.size}") {
+                                    field("Номер заказа: #${order.orderId}")
+                                    field("Количество товаров: ${order.productList?.size}") {
                                         button("->") {
                                             tooltip("Shows order info")
                                             action { navigateToLeft<OrderScreen>() }
                                         }
                                     }
-                                    field("Driver id: ${order.driverId}") {
+//                                    field("Адрес отправления:\n")
+//                                    field("Адрес доставки: ")
+
+
+                                    field("Номер водителя: #${order.driverId}") {
                                         button("->") {
                                             tooltip("Shows order info")
                                             action { navigateToLeft<DriverScreen>() }
                                         }
                                     }
-                                    field("Status: ${order.status}")
-                                    field("Total cost: 1000 р.")
+
+                                    field("Статус: ${order.status}")
+                                    field("Стоимость: 743 р.")
+                                    button("Показать маршрут")
                                 }
                             }
                         }
