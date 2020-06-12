@@ -2,21 +2,18 @@ package ru.delivery.system.views
 
 import de.saring.leafletmap.*
 import io.github.rybalkinsd.kohttp.ext.httpGet
-import javafx.collections.FXCollections
-import javafx.scene.Parent
 import javafx.scene.layout.BorderPane
 import javafx.scene.paint.Color
 import okhttp3.Response
 import ru.delivery.system.common.JsonSerializer
 import ru.delivery.system.common.navigateToLeft
 import ru.delivery.system.controllers.LoginController
+import ru.delivery.system.controllers.OrderListController
 import ru.delivery.system.executors.ScheduledMapUpdater
 import ru.delivery.system.models.json.OrderRoute
-import ru.delivery.system.models.viewmodels.Order
 import ru.delivery.system.rest.HttpHelper
 import ru.delivery.system.views.MapView.Map.mapView
 import ru.delivery.system.views.child_screens.DriverScreen
-import ru.delivery.system.views.child_screens.DriverViewMain
 import ru.delivery.system.views.child_screens.OrderScreen
 import ru.delivery.system.views.common.MainScreenFooter
 import ru.delivery.system.views.common.MainScreenHeader
@@ -95,31 +92,74 @@ class MapView : View() {
 
 class OrderListView : View() {
 
-    val ordersList = FXCollections.observableArrayList<Order>()
+    private val orderListController = OrderListController
+    private val openedOrders: ArrayList<Int> = arrayListOf()
 
     override val root = borderpane {
         top {
+            form {
+                fieldset {
+                    minWidth = 250.0
+                    maxWidth = 250.0
+                    field {
+                        val textField = textfield()
+                        textField.promptText = "Номер заказа"
+                        button("Поиск").action { orderListController.findById(textField.text) }
+                    }
+                    field {
+                        checkbox("Done") { isSelected = true }
+                        checkbox("In progress") { isSelected = true }
+                        checkbox("Completed") { isSelected = true }
+                        checkbox("Canceled") { isSelected = true }
+                    }
+                }
+            }
+        }
+
+        left {
             scrollpane {
-                squeezebox {
-                    minWidth = 200.0
-                    // TODO: Отображение релаьных заказов
-                    for (i in 1..10) {
-                        fold("Order #$i") {
+                vbox {
+                    children.bind(orderListController.displayedValues) { order ->
+                        titledpane("Order# ${order.orderId}") {
+
+                            expandedProperty().addListener { _, _, new ->
+                                if (!new) {
+                                    openedOrders.remove(order.orderId!!)
+                                } else {
+                                    openedOrders.add(order.orderId!!)
+                                }
+                                println(openedOrders.toString())
+                            }
+
+                            isExpanded = openedOrders.findLast { it == order.orderId } != null
                             form {
+                                style {
+                                    when (order.status) {
+                                        "IN_PROGRESS" -> backgroundColor += Color.LIGHTGREEN
+                                        "DONE" -> backgroundColor += Color.RED
+                                        "CANCELED" -> backgroundColor += Color.LIGHTYELLOW
+                                        "NEW" -> backgroundColor += Color.WHITE
+                                    }
+                                }
+
                                 fieldset {
-                                    field("Products count: 4") {
+                                    minWidth = 250.0
+                                    maxWidth = 250.0
+
+                                    field(order.orderId.toString())
+                                    field("Products count: ${order.productList?.size}") {
                                         button("->") {
                                             tooltip("Shows order info")
                                             action { navigateToLeft<OrderScreen>() }
                                         }
                                     }
-                                    field("Driver name: Alex") {
+                                    field("Driver id: ${order.driverId}") {
                                         button("->") {
                                             tooltip("Shows order info")
                                             action { navigateToLeft<DriverScreen>() }
                                         }
                                     }
-                                    field("Status: active")
+                                    field("Status: ${order.status}")
                                     field("Total cost: 1000 р.")
                                 }
                             }

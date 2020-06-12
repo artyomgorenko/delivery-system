@@ -25,7 +25,9 @@ class Track (
     }
 
     fun display(map: LeafletMapView) {
-        map.addTrackWithMarkers(coords, color)
+        if (coords.isNotEmpty()) {
+            map.addTrackWithMarkers(coords, color)
+        }
     }
 
 }

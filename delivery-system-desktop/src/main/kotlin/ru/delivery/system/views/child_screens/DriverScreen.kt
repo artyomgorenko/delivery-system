@@ -1,5 +1,7 @@
 package ru.delivery.system.views.child_screens
 
+import javafx.collections.FXCollections
+import javafx.scene.Node
 import ru.delivery.system.views.common.ChildScreenFooter
 import ru.delivery.system.views.common.ChildScreenHeader
 import tornadofx.*
@@ -16,9 +18,9 @@ class DriverScreen : View("Driver info") {
 }
 
 class DriverViewMain : View() {
+
     override val root = borderpane {
         center {
-            label("Driver screen")
         }
     }
 }
