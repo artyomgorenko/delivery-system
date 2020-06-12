@@ -1,8 +1,8 @@
 package ru.delivery.system.views.child_screens
 
-import javafx.beans.property.SimpleStringProperty
 import ru.delivery.system.common.ExcelUtils
 import ru.delivery.system.controllers.OrderListController
+import ru.delivery.system.models.json.OrderInfo
 import ru.delivery.system.models.viewmodels.Order
 import ru.delivery.system.models.viewmodels.OrderModel
 import ru.delivery.system.views.common.ChildScreenHeader
@@ -19,13 +19,12 @@ class OrderScreen : View("Заказы") {
     }
 
     private var orders = OrderListController.gerOrderList().observable()
-    private var orderProductList = listOf(
+    private var orderProductList = mutableListOf<OrderInfo.Product>().observable()
+    /* = listOf(
         SimpleStringProperty("Product#1"),
         SimpleStringProperty("Product#2")
-    ).observable()
+    ).observable()*/
     private val model = OrderModel(Order())
-
-
 
     override fun onDock() {
         orders.clear()
@@ -46,6 +45,8 @@ class OrderScreen : View("Заказы") {
                 // Update the person inside the view model on selection change
                 model.rebindOnChange(this) { selectedOrder ->
                     item = selectedOrder ?: Order()
+                    orderProductList.clear()
+                    orderProductList.addAll(item.productList)
                 }
             }
         }
@@ -87,9 +88,9 @@ class OrderScreen : View("Заказы") {
                         TempProduct("Product #4", "1")
                     ).observable()
                     fieldset("Список товаров") {
-                        tableview(tempProductList/*orderProductList*/) {
-                            column("Название", SimpleStringProperty::getValue)
-                            column("Количество", SimpleStringProperty::getValue)
+                        tableview(orderProductList) {
+                            column("Название", OrderInfo.Product::name)
+                            column("Количество", OrderInfo.Product::count)
                         }
                     }
                     hbox {

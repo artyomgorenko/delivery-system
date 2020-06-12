@@ -13,9 +13,9 @@ import ru.delivery.system.views.common.ChildScreenHeader
 import tornadofx.*
 import java.time.LocalDate
 import java.util.*
+import kotlin.concurrent.thread
 
 class ReportScreen : View("Отчётность") {
-
 
     override val root = tabpane {
         tab<TabOne>()
@@ -83,7 +83,6 @@ class ReportScreen : View("Отчётность") {
                         TempCargo("00008", "product #2", "#3", "912 р.")
                     ).observable()
 
-                    label("Список товаров") { style { fontSize = Dimension(20.0, Dimension.LinearUnits.px) } }
                     tableview(tempCargoList) {
                         minHeightProperty().set(800.0)
                         readonlyColumn("Номер товара", TempCargo::cargoId)
@@ -201,13 +200,13 @@ class ReportScreen : View("Отчётность") {
         /*For combobox*/
         var productList = ProductListController.productList
         var productListItem = SimpleObjectProperty<ProductListEntity.Product>(productList.firstOrNull())
-
-
+        private lateinit var vboxVisible: BooleanProperty
 
         override val root = borderpane {
             center {
-
                 vbox {
+                    vboxVisible = visibleProperty()
+                    vboxVisible.set(false)
                     style {
                         backgroundColor += Color.WHITE
                     }
@@ -246,9 +245,7 @@ class ReportScreen : View("Отчётность") {
                             (1120.0 + 7740.0 + 10740.0) / 0.5
                         )
                     }
-
                 }
-
             }
 
             right {
@@ -257,34 +254,29 @@ class ReportScreen : View("Отчётность") {
                         backgroundColor += Color.WHITE
                     }
 
+                    val warehousesList = mutableListOf<String>().observable()
                     label("Список складов") { style { fontSize = Dimension(20.0, Dimension.LinearUnits.px) } }
-                    listview<String> {
-                        items.add("Склад #1")
-                        items.add("Склад #2")
-                        items.add("Склад #5")
-                    }
+                    listview(warehousesList)
 
+                    val articleList = mutableListOf<String>().observable()
                     label("Список артикулов") { style { fontSize = Dimension(20.0, Dimension.LinearUnits.px) } }
-                    listview<String> {
-                        items.add("Product #1")
-                        items.add("Product #1")
-                        items.add("Product #2")
-                        items.add("Product #5")
-                    }
+                    listview(articleList)
+
                     form {
                         fieldset {
                             field("Список артикулов") {
                                 val deliveryTypes = listOf("Product #5", "Product #1")
                                 val deliveryTypeItem = SimpleStringProperty(deliveryTypes.firstOrNull())
-                                combobox(deliveryTypeItem, deliveryTypes)
+                                val articleComboBox = combobox(deliveryTypeItem, deliveryTypes)
 
                                 //TODO: uncomment it
 //                                combobox(productListItem, productList) {
 //                                    cellFormat { text = it.name }
 //                                }
                                 button("Добавить").action {
-                                    addOrUpdate(
-                                        ProductItem("Product #1")
+                                    articleList.add(articleComboBox.selectedItem)
+//                                    addOrUpdate(
+//                                        ProductItem("Product #1")
 //                                    ProductListItem(
 //                                        productListItem.value.productId!!,
 //                                        productListItem.value.name!!,
@@ -295,13 +287,13 @@ class ReportScreen : View("Отчётность") {
 //                                        productListItem.value.weight!!,
 //                                        1
 //                                    )
-                                    )
+//                                    )
                                 }
                             }
                             field("Список складов") {
                                 val warehouses = listOf("Склад #5", "Склад #2", "Склад #3")
                                 val warehouseItem = SimpleStringProperty(warehouses.firstOrNull())
-                                combobox(warehouseItem, warehouses)
+                                val warehouseComboBox = combobox(warehouseItem, warehouses)
 
                                 //TODO: implement warehouse list
 //                                combobox(productListItem, productList) {
@@ -309,8 +301,9 @@ class ReportScreen : View("Отчётность") {
 //                                    cellFormat { text = it.name }
 //                                }
                                 button("Добавить").action {
-                                    addOrUpdate(
-                                        ProductItem("Product #1")
+                                    warehousesList.add(warehouseComboBox.selectedItem!!)
+//                                    addOrUpdate(
+//                                        ProductItem("Product #1")
 //                                    ProductListItem(
 //                                        productListItem.value.productId!!,
 //                                        productListItem.value.name!!,
@@ -321,7 +314,7 @@ class ReportScreen : View("Отчётность") {
 //                                        productListItem.value.weight!!,
 //                                        1
 //                                    )
-                                    )
+//                                    )
                                 }
                             }
 
@@ -338,12 +331,20 @@ class ReportScreen : View("Отчётность") {
                             }
                             hbox {
                                 spacingProperty().set(5.0)
-                                button("Составить отчёт")
-                                button("Очистить списки")
+                                button("Составить отчёт").action {
+                                    thread {
+                                        Thread.sleep(2000)
+                                        vboxVisible.set(true)
+                                    }
+                                }
+
+                                button("Очистить списки").action {
+                                    warehousesList.clear()
+                                    articleList.clear()
+                                }
                             }
                         }
                     }
-
                 }
 //                form {
 //                    fieldset {
@@ -388,21 +389,27 @@ class ReportScreen : View("Отчётность") {
             "Product #4",
             "Product #5"
         ).observable()
+        private lateinit var vboxVisible: BooleanProperty
 
         override val root = borderpane {
             center {
-                barchart("Доходы за период с 21.05 по 27.05", CategoryAxis(), NumberAxis()) {
-                    series("Расходы") {
-                        data("Proudct #1", -(890.0 + 420.0 + 4056.0)/0.3){ style { barFill = Color.ORANGERED } }
-                        data("Proudct #2", -(890.0 + 420.0 + 4056.0)/0.2){ style { barFill = Color.ORANGERED } }
-                        data("Proudct #3", -(890.0 + 420.0 + 4056.0)/0.1){ style { barFill = Color.ORANGERED } }
-                        data("Proudct #4", -(890.0 + 420.0 + 4056.0)/0.4){ style { barFill = Color.ORANGERED } }
-                    }
-                    series("Доходы") {
-                        data("Proudct #1", 9345 / 0.5)
-                        data("Proudct #2", 9345 / 0.2)
-                        data("Proudct #3", 9345 / 0.1)
-                        data("Proudct #4", 9345 / 0.3)
+                hbox {
+                    vboxVisible = visibleProperty()
+                    vboxVisible.set(false)
+
+                    barchart("Доходы за период с 21.05 по 27.05", CategoryAxis(), NumberAxis()) {
+                        series("Расходы") {
+                            data("Proudct #1", -(890.0 + 420.0 + 4056.0)/0.3){ style { barFill = Color.ORANGERED } }
+                            data("Proudct #2", -(890.0 + 420.0 + 4056.0)/0.2){ style { barFill = Color.ORANGERED } }
+                            data("Proudct #3", -(890.0 + 420.0 + 4056.0)/0.1){ style { barFill = Color.ORANGERED } }
+                            data("Proudct #4", -(890.0 + 420.0 + 4056.0)/0.4){ style { barFill = Color.ORANGERED } }
+                        }
+                        series("Доходы") {
+                            data("Proudct #1", 9345 / 0.5)
+                            data("Proudct #2", 9345 / 0.2)
+                            data("Proudct #3", 9345 / 0.1)
+                            data("Proudct #4", 9345 / 0.3)
+                        }
                     }
                 }
             }
@@ -412,45 +419,27 @@ class ReportScreen : View("Отчётность") {
                         backgroundColor += Color.WHITE
                     }
                     label("Отчёт о доходах") { style { fontSize = Dimension(20.0, Dimension.LinearUnits.px) } }
-                    textarea {
+                    val reportTextArea = textarea {
                         minHeightProperty().set(400.0)
-                        text = """
-                            Заказов доставлено: 11
-                            На сумму: 9345 р.
-
-                            Заказов отклонено: 2
-                            Расходы: 890 р.
-
-                            Внутренних перевозок: 4
-                            Расходы: 420р.
-
-                            Затраты на хранение: 4056 р.
-
-                            Итого: + ${9345 - 890 - 420 - 4056}
-                        """.trimIndent()
                     }
 
+                    val articleList = mutableListOf<String>().observable()
                     label("Список артикулов") { style { fontSize = Dimension(20.0, Dimension.LinearUnits.px) } }
-                    listview<String> {
-                        items.add("Product #1")
-                        items.add("Product #2")
-                        items.add("Product #3")
-                        items.add("Product #4")
-                    }
+                    listview(articleList)
 
                     form {
                         fieldset {
                             field("Список артикулов") {
                                 val deliveryTypes = listOf("Product #4", "Product #1")
                                 val deliveryTypeItem = SimpleStringProperty(deliveryTypes.firstOrNull())
-                                combobox(deliveryTypeItem, deliveryTypes)
+                                val articleComboBox = combobox(deliveryTypeItem, deliveryTypes)
 
                                 //TODO: uncomment it
 //                                combobox(productListItem, productList) {
 //                                    cellFormat { text = it.name }
 //                                }
                                 button("Добавить").action {
-
+                                    articleList.add(articleComboBox.selectedItem!!)
                                 }
                             }
 
@@ -467,8 +456,27 @@ class ReportScreen : View("Отчётность") {
                             }
                             hbox {
                                 spacingProperty().set(5.0)
-                                button("Составить отчёт")
-                                button("Очистить")
+                                button("Составить отчёт").action {
+                                    thread {
+                                        Thread.sleep(2000)
+                                        reportTextArea.text = """
+                                            Заказов доставлено: 11
+                                            На сумму: 9345 р.
+
+                                            Заказов отклонено: 2
+                                            Расходы: 890 р.
+
+                                            Внутренних перевозок: 4
+                                            Расходы: 420р.
+
+                                            Затраты на хранение: 4056 р.
+
+                                            Итого: + ${9345 - 890 - 420 - 4056}
+                                        """.trimIndent()
+                                        vboxVisible.set(true)
+                                    }
+                                }
+                                button("Очистить").action { articleList.clear() }
                             }
                         }
                     }

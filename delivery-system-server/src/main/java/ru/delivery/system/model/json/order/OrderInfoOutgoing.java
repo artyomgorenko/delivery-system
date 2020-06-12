@@ -38,9 +38,25 @@ public class OrderInfoOutgoing {
     @Getter @Setter
     private String departurePoint;
 
+    @JsonProperty(value = "departureLongitude")
+    @Getter @Setter
+    private Double departureLongitude;
+
+    @JsonProperty(value = "departureLatitude")
+    @Getter @Setter
+    private Double departureLatitude;
+
     @JsonProperty(value = "destinationPoint")
     @Getter @Setter
     private String destinationPoint;
+
+    @JsonProperty(value = "destinationLongitude")
+    @Getter @Setter
+    private Double destinationLongitude;
+
+    @JsonProperty(value = "destinationLatitude")
+    @Getter @Setter
+    private Double destinationLatitude;
 
     /**
      * Список продуктов в заказе

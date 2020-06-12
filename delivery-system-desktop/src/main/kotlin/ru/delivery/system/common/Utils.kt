@@ -1,5 +1,8 @@
 package ru.delivery.system.common
 
+import de.saring.leafletmap.LatLong
+import ru.delivery.system.models.json.NominatimResponse
+import ru.delivery.system.rest.HttpHelper
 import tornadofx.*
 import tornadofx.FX.Companion.primaryStage
 import java.io.BufferedReader
@@ -39,4 +42,19 @@ private fun sendGet(url: String) {
             println("Response:$response")
         }
     }
+}
+
+fun getCoordsFromAddress(city: String, street: String, houseNumber: String) : LatLong? {
+    val resp = HttpHelper.syncGetFullUrl("https://nominatim.openstreetmap.org/search?city=$city&street=$street $houseNumber&format=geocodejson&limit=1")
+    resp.use { response ->
+        if (response.isSuccessful) {
+            response.body()?.let { body ->
+                val nResp = JsonSerializer().toEntity<NominatimResponse>(body.string())
+                body.close()
+                val latLongArray = nResp.features!![0].geometry!!.coordinates!!
+                return LatLong(latLongArray[0].toDouble(), latLongArray[1].toDouble())
+            }
+        }
+    }
+    return null
 }

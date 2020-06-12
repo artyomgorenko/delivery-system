@@ -191,7 +191,20 @@ class OrderListView : View() {
 
                                     field("Статус: ${order.status}")
                                     field("Стоимость: 743 р.")
-                                    button("Показать маршрут")
+                                    button("Показать маршрут").action {
+                                        mapView.removeLayers("ОТПРАВЛЕНИЕ", "ПРИБЫТИЕ", "МАРШРУТ")
+                                        mapView.addMarker(LatLong(order.departureLongitude!!, order.departureLatitude!!), "ОТПРАВЛЕНИЕ", ColorMarker.RED_MARKER, 0)
+                                        mapView.addMarker(LatLong(order.destinationLongitude!!, order.destinationLatitude!!), "ПРИБЫТИЕ", ColorMarker.GREEN_MARKER, 0)
+                                        mapView.setView(LatLong(order.departureLongitude!!, order.departureLatitude!!), 16)
+                                        order.orderRoute?.let { route ->
+                                            val coords = ArrayList<LatLong>()
+                                            route.routePoints?.forEach { point ->
+                                                val latLong = LatLong(point.geoPoint!!.latitude!!.toDouble(), point.geoPoint!!.longitude!!.toDouble())
+                                                coords.add(latLong)
+                                            }
+                                            mapView.addTrackWithFocus(coords, TrackColor.BLUE)
+                                        }
+                                    }
                                 }
                             }
                         }
