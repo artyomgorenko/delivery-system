@@ -12,7 +12,7 @@ class LoginController : Controller() {
     val statusProperty = SimpleStringProperty()
     var status by statusProperty
     val user: UserModel by inject()
-    private val httpHelper = HttpHelper("localhost", 8080)
+    private val httpHelper = HttpHelper
 
 
     fun login(username: String?, password: String?) {

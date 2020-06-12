@@ -7,6 +7,10 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
+inline fun <reified T : View> openModal() {
+    find<T>().openModal()
+}
+
 inline fun <reified T : View> navigateTo() {
     primaryStage.uiComponent<UIComponent>()?.replaceWith(T::class)
 }

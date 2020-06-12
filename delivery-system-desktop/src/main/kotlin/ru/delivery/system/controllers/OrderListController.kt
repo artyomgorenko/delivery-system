@@ -2,7 +2,6 @@ package ru.delivery.system.controllers
 
 import de.saring.leafletmap.LatLong
 import de.saring.leafletmap.TrackColor
-import io.github.rybalkinsd.kohttp.ext.httpGet
 import javafx.application.Platform
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -11,10 +10,12 @@ import ru.delivery.system.common.JsonSerializer
 import ru.delivery.system.executors.ScheduledMapUpdater
 import ru.delivery.system.models.Track
 import ru.delivery.system.models.json.OrderInfo
+import ru.delivery.system.rest.HttpHelper
 import ru.delivery.system.views.MapView
-import tornadofx.FX.Companion.log
 
 object OrderListController {
+
+    private val httpHelper = HttpHelper
 
     private var orderListValues: List<OrderInfo> = arrayListOf(
         OrderInfo().apply {
@@ -77,7 +78,8 @@ object OrderListController {
         try {
             println("Start to update map")
             val queryParamList = orderIdList.joinToString(separator = "&") {"orderIdList=$it"} // [1,2,3]
-            val response: Response = "http://localhost:8080/delivery-system/order/getOrderInfo?$queryParamList".httpGet()
+//            val response: Response = httpHelper.syncGet("order/getOrderInfo?$queryParamList")
+            val response: Response = httpHelper.syncGet("order/getAllOrders")
 
             response.use {
                 if (response.isSuccessful) {

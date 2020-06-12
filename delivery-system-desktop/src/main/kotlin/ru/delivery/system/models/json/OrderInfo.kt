@@ -9,47 +9,47 @@ import java.util.Date
  */
 class OrderInfo {
 
-    @JsonProperty(value = "orderId")
+    @JsonProperty("orderId")
     var orderId: Int? = null
 
-    @JsonProperty(value = "createDate")
+    @JsonProperty("createDate")
     var createDate: Date? = null
 
-    @JsonProperty(value = "status")
+    @JsonProperty("status")
     var status: String? = null
 
-    @JsonProperty(value = "driverId")
+    @JsonProperty("driverId")
     var driverId: Int? = null
 
-    @JsonProperty(value = "transportId")
+    @JsonProperty("transportId")
     var transportId: Int? = null
 
-    @JsonProperty(value = "departurePoint")
+    @JsonProperty("departurePoint")
     var departurePoint: String? = null
 
-    @JsonProperty(value = "destinationPoint")
+    @JsonProperty("destinationPoint")
     var destinationPoint: String? = null
 
     /**
      * Список продуктов в заказе
      */
-    @JsonProperty(value = "productList")
+    @JsonProperty("productList")
     var productList: List<Product>? = null
 
     /**
      * Маршрут доставки заказа
      */
-    @JsonProperty(value = "orderRoute")
+    @JsonProperty("orderRoute")
     var orderRoute: Route? = null
 
     class Product {
-        @JsonProperty(value = "productId")
+        @JsonProperty("productId")
         var productId: Int? = null
 
-        @JsonProperty(value = "count")
+        @JsonProperty("count")
         var count: Int? = null
 
-        @JsonProperty(value = "cost")
+        @JsonProperty("cost")
         var cost: Double? = null
 
         @JsonProperty("name")
@@ -69,17 +69,17 @@ class OrderInfo {
     }
 
     class Route {
-        @JsonProperty(value = "routeDistance")
+        @JsonProperty("routeDistance")
         var routeDistance: Double? = null
 
-        @JsonProperty(value = "routePoints")
+        @JsonProperty("routePoints")
         var routePoints: List<RoutePoint>? = null
 
         class RoutePoint {
-            @JsonProperty(value = "serialNumber")
+            @JsonProperty("serialNumber")
             var serialNumber: Int? = null
 
-            @JsonProperty(value = "geoPoint")
+            @JsonProperty("geoPoint")
             var geoPoint: OrderRoute.RoutePoint.GeoPoint? = null
         }
     }

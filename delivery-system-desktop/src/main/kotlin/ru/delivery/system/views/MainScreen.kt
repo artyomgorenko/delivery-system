@@ -5,16 +5,17 @@ import io.github.rybalkinsd.kohttp.ext.httpGet
 import javafx.scene.layout.BorderPane
 import javafx.scene.paint.Color
 import okhttp3.Response
+import ru.delivery.system.common.ColorConstatnts
 import ru.delivery.system.common.JsonSerializer
 import ru.delivery.system.common.navigateToLeft
 import ru.delivery.system.controllers.LoginController
 import ru.delivery.system.controllers.OrderListController
 import ru.delivery.system.executors.ScheduledMapUpdater
 import ru.delivery.system.models.json.OrderRoute
-import ru.delivery.system.rest.HttpHelper
 import ru.delivery.system.views.MapView.Map.mapView
 import ru.delivery.system.views.child_screens.DriverScreen
 import ru.delivery.system.views.child_screens.OrderScreen
+import ru.delivery.system.views.child_screens.OrderCreateScreen
 import ru.delivery.system.views.common.MainScreenFooter
 import ru.delivery.system.views.common.MainScreenHeader
 import tornadofx.*
@@ -32,7 +33,6 @@ class MainScreen : View("Main screen") {
  */
 class MapView : View() {
     override val root = BorderPane()
-    private val httpHelper = HttpHelper("localhost", 8080)
     private val loginController: LoginController by inject()
 
     object Map {
@@ -61,7 +61,8 @@ class MapView : View() {
 
             bottom {
                 hbox {
-                    button("Add marker") { action { mapView.addMarker(LatLong(51.1, -0.2), "TEST MARKER", ColorMarker.BLACK_MARKER, 0) } }
+                    button("Создать заказ").action { find<OrderCreateScreen>().openModal() }
+                    button("Add marker").action { mapView.addMarker(LatLong(51.1, -0.2), "TEST MARKER", ColorMarker.BLACK_MARKER, 0) }
                     button("Draw orderList route") {
                         style {
                             baseColor = Color.RED
@@ -83,13 +84,15 @@ class MapView : View() {
                             }
                         }
                     }
-                    button("Log out").action(loginController::logout)
                 }
             }
         }
     }
 }
 
+/**
+ * Список заказов
+ */
 class OrderListView : View() {
 
     private val orderListController = OrderListController
@@ -97,6 +100,7 @@ class OrderListView : View() {
 
     override val root = borderpane {
         top {
+
             form {
                 fieldset {
                     minWidth = 250.0
@@ -135,10 +139,10 @@ class OrderListView : View() {
                             form {
                                 style {
                                     when (order.status) {
-                                        "IN_PROGRESS" -> backgroundColor += Color.LIGHTGREEN
-                                        "DONE" -> backgroundColor += Color.RED
-                                        "CANCELED" -> backgroundColor += Color.LIGHTYELLOW
-                                        "NEW" -> backgroundColor += Color.WHITE
+                                        "IN_PROGRESS" -> backgroundColor += ColorConstatnts.ORDER_IN_PROGRESS
+                                        "DONE" -> backgroundColor += ColorConstatnts.ORDER_DONE
+                                        "CANCELED" -> backgroundColor += ColorConstatnts.ORDER_CANCELED
+                                        "NEW" -> backgroundColor += ColorConstatnts.ORDER_NEW
                                     }
                                 }
 
