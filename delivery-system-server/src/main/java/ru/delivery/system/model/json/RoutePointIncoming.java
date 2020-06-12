@@ -1,4 +1,4 @@
-package ru.delivery.system.model.json.order;
+package ru.delivery.system.model.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
@@ -9,15 +9,19 @@ import ru.delivery.system.model.other.GeoPoint;
  * Body запроса на добавление точки к маршруту заказа
  */
 public class RoutePointIncoming {
-    @JsonProperty(value = "orderId")
+    @JsonProperty("orderId")
     @Getter @Setter
     private Integer orderId;
 
-    @JsonProperty(value = "serialNumber")
+    @JsonProperty("driverId")
+    @Getter @Setter
+    private Integer driverId;
+
+    @JsonProperty("serialNumber")
     @Getter @Setter
     private Integer serialNumber;
 
-    @JsonProperty(value = "geoPoint")
+    @JsonProperty("geoPoint")
     @Getter @Setter
     private GeoPoint geoPoint;
 }

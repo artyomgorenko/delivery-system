@@ -3,8 +3,10 @@ package ru.delivery.system.dao;
 import ru.delivery.system.model.entities.UserEntity;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.List;
 
 @Stateless
 public class UserManager {
@@ -28,5 +30,15 @@ public class UserManager {
                 "where u.id=:userId", UserEntity.class)
                 .setParameter("userId", userId)
                 .getSingleResult();
+    }
+
+    public List<UserEntity> getAllUsers() {
+        return em.createQuery("select u from UserEntity u", UserEntity.class).getResultList();
+    }
+
+    @TransactionAttribute
+    public void save(UserEntity userEntity) {
+        em.merge(userEntity);
+        em.flush();
     }
 }

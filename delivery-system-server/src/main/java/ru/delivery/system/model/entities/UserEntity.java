@@ -41,4 +41,14 @@ public class UserEntity {
     @Column(name = "u_role")
     @Getter @Setter
     private String role;
+
+    @Basic
+    @Column(name = "u_last_latitude")
+    @Getter @Setter
+    private Float lastLatitude;
+
+    @Basic
+    @Column(name = "u_last_longitude")
+    @Getter @Setter
+    private Float lastLongitude;
 }

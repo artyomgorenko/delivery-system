@@ -26,8 +26,8 @@ dependencies {
     providedCompile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
 
     providedCompile "com.fasterxml.jackson.core:jackson-core:2.9.0"
-    providedCompile "com.fasterxml.jackson.core:jackson-annotations:2.9.0"
     providedCompile "com.fasterxml.jackson.core:jackson-databind:2.9.0"
+    providedCompile "com.fasterxml.jackson.core:jackson-annotations:2.9.0"
     providedCompile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.0"
 
     compile group: 'javax', name: 'javaee-api', version: '8.0'

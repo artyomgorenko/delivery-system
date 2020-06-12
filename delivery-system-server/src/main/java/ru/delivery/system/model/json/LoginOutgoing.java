@@ -5,6 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class LoginOutgoing {
+
+    @JsonProperty(value = "userId")
+    @Getter @Setter
+    private String userId;
+
     @JsonProperty(value = "name")
     @Getter @Setter
     private String name;

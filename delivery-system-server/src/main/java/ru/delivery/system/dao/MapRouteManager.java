@@ -3,7 +3,7 @@ package ru.delivery.system.dao;
 import ru.delivery.system.model.entities.MapRouteEntity;
 import ru.delivery.system.model.entities.MapRoutePointEntity;
 import ru.delivery.system.model.json.order.OrderMarkerIncoming;
-import ru.delivery.system.model.json.order.RoutePointIncoming;
+import ru.delivery.system.model.json.RoutePointIncoming;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -45,6 +45,8 @@ public class MapRouteManager {
         MapRouteEntity mapRouteEntity = getMapRouteByOrderId(orderId);
         MapRoutePointEntity mapRoutePointEntity = new MapRoutePointEntity();
         mapRoutePointEntity.setMrpMrId(mapRouteEntity.getMrId());
+        mapRoutePointEntity.setMapRouteEntity(mapRouteEntity);
+        mapRoutePointEntity.setMapRouteEntity(mapRouteEntity);
         mapRoutePointEntity.setMrpSerialNumber(routePointIncoming.getSerialNumber());
         mapRoutePointEntity.setMrpLatitude(routePointIncoming.getGeoPoint().getLatitude());
         mapRoutePointEntity.setMrpLongitude(routePointIncoming.getGeoPoint().getLongitude());

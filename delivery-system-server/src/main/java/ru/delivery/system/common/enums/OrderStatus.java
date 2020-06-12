@@ -2,6 +2,7 @@ package ru.delivery.system.common.enums;
 
 public enum OrderStatus {
     NEW,
+    SHIPMENT, // Путь до склада
     IN_PROGRESS,
     DONE,
     CANCELED;

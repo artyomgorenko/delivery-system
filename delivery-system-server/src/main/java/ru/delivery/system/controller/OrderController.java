@@ -6,6 +6,7 @@ import ru.delivery.system.dao.OrderManager;
 import ru.delivery.system.dao.TransportManager;
 import ru.delivery.system.dao.UserManager;
 import ru.delivery.system.model.entities.*;
+import ru.delivery.system.model.json.RoutePointIncoming;
 import ru.delivery.system.model.json.common.RoutePoint;
 import ru.delivery.system.model.json.order.*;
 import ru.delivery.system.model.other.GeoPoint;
@@ -222,14 +223,21 @@ public class OrderController {
 
                 respHeader.setMessage("Заказ взят в работу");
             }
+//            else if (OrderStatus.SHIPMENT.isEqual(requestBody.getNewStatus())) {
+//                TODO: it's new first status after NEW
+//            }
             else if (OrderStatus.DONE.isEqual(requestBody.getNewStatus())) {
                 if (!OrderStatus.IN_PROGRESS.isEqual(orderEntity.getStatus())) {
                     error("Заказ не может быть завершен. Неверный статус");
                 }
-
                 orderEntity.setStatus(OrderStatus.DONE.name());
                 respBody.setDistanceInMeters(100F);
                 respBody.setDeliveryTimeMs(100L);
+//                if (!orderEntity.getOrderMapRoutes().isEmpty()) {
+//                    List<MapRoutePointEntity> routePoints = orderEntity.getOrderMapRoutes().get(0).getMapRouteEntity().getMapRoutePoints();
+//                    for (MapRoutePointEntity routePoint: routePoints) {
+//                    }
+//                }
                 respHeader.setMessage("Заказ завершен");
             }
             else if (OrderStatus.CANCELED.isEqual(requestBody.getNewStatus())) {
@@ -258,19 +266,33 @@ public class OrderController {
     }
 
     /**
-     * Добавление точки маршрута для заказа
+     * Добавление точки маршрута для заказа и обновления последнего местоположения водителя,
+     * либо только обновление местоположения
      */
     @POST
     @Path("/addRoutePoint")
     public Response addRoutePoint(String json) {
         try {
             RoutePointIncoming routePointIncoming = toEntity(json, RoutePointIncoming.class);
-            OrderEntity orderEntity = orderManager.getOrderById(routePointIncoming.getOrderId());
-            if (orderEntity == null) {
-                throw new RuntimeException("Маршрут для заказа с номером " + routePointIncoming.getOrderId() + " не найден");
+
+            if (routePointIncoming.getOrderId() != null) {
+                OrderEntity orderEntity = orderManager.getOrderById(routePointIncoming.getOrderId());
+                if (orderEntity == null) {
+                    error("Маршрут для заказа с номером " + routePointIncoming.getOrderId() + " не найден");
+                }
+
+                mapRouteManager.createRoutePoint(orderEntity.getOId(), routePointIncoming);
             }
 
-            mapRouteManager.createRoutePoint(orderEntity.getOId(), routePointIncoming);
+            UserEntity userEntity = userManager.getUserById(routePointIncoming.getDriverId());
+            if (userEntity == null) {
+                error("Пользователь с id=" + routePointIncoming.getDriverId() + " не найден");
+            }
+            // update last driver position
+            userEntity.setLastLatitude(routePointIncoming.getGeoPoint().getLatitude());
+            userEntity.setLastLongitude(routePointIncoming.getGeoPoint().getLongitude());
+            userManager.save(userEntity);
+
             return Response.status(Response.Status.OK).entity(null).build();
         } catch (Exception e) {
             String jsonMessage = "{\"Error\":\"" + e.getMessage() + "\"}";
