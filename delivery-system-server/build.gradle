@@ -1,0 +1,51 @@
+plugins {
+    id 'ear'
+    id 'java'
+    id 'war'
+}
+
+group 'delivery-system-server'
+version '1.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // The following dependencies will be the ear modules and
+    // will be placed in the ear root
+    // deploy project(':war')
+    compile group: 'org.hibernate', name: 'hibernate-core', version: '5.4.2.Final'
+    compile group: 'javax', name: 'javaee-api', version: '8.0'
+    compile 'org.projectlombok:lombok:1.18.6'
+
+//    earlib group: 'log4j', name: 'log4j'
+//    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.2'
+//    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
+    // The following dependencies will become ear libs and will
+    // be placed in a dir configured via the libDirName property
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+ear {
+    appDirName 'src/main/app'  // use application metadata found in this folder
+    // put dependent libraries into APP-INF/lib inside the generated EAR
+    libDirName 'APP-INF/lib'
+    deploymentDescriptor {  // custom entries for application.xml:
+//      fileName = "application.xml"  // same as the default value
+//      version = "6"  // same as the default value
+        applicationName = "customear"
+        initializeInOrder = true
+//      displayName = "Custom Ear"  // defaults to project.name
+        // defaults to project.description if not set
+//      description = "My customized EAR for the Gradle documentation"
+//      libraryDirectory = "APP-INF/lib"  // not needed, above libDirName setting does this
+//      module("my.jar", "java")  // won't deploy as my.jar isn't deploy dependency
+//      webModule("my.war", "/")  // won't deploy as my.war isn't deploy dependency
+//      securityRole "admin"
+//      securityRole "superadmin"
+    }
+}

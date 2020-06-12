@@ -1,0 +1,4 @@
+<jboss-web>
+    <context-root>delivery-system</context-root>
+    <max-active-sessions>200</max-active-sessions>
+</jboss-web>
