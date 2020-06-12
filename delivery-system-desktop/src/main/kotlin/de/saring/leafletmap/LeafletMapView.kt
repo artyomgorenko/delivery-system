@@ -74,7 +74,7 @@ open class LeafletMapView : StackPane() {
         execScript("""
                 |var myMap = L.map('map', {
                 |    center: new L.LatLng(${mapConfig.initialCenter.latitude}, ${mapConfig.initialCenter.longitude}),
-                |    zoom: 8,
+                |    zoom: ${mapConfig.initialZoom},
                 |    zoomControl: false,
                 |    layers: [layer1]
                 |});
@@ -139,12 +139,12 @@ open class LeafletMapView : StackPane() {
      * @param zIndexOffset zIndexOffset (higher number means on top)
      * @return variable name of the created marker
      */
-    fun addMarker(position: LatLong, title: String, marker: Marker, zIndexOffset: Int): String {
+    fun addMarker(position: LatLong, title: String, marker: Marker = ColorMarker.RED_MARKER, zIndexOffset: Int = 0): String {
         val varName = "marker${varNameSuffix++}"
 
         execScript("var $varName = L.marker([${position.latitude}, ${position.longitude}], "
                 + "{title: '$title', icon: ${marker.iconName}, zIndexOffset: $zIndexOffset}).addTo(myMap);")
-        return varName;
+        return varName
     }
 
     /**

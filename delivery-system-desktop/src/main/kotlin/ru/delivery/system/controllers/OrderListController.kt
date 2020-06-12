@@ -76,7 +76,7 @@ object OrderListController {
 
     fun getOrdersById(orderIdList: List<Int> = displayedValues.map { it.orderId!! } ) {
         try {
-            println("Start to update map")
+            println("Start orderList updating")
             val queryParamList = orderIdList.joinToString(separator = "&") {"orderIdList=$it"} // [1,2,3]
 //            val response: Response = httpHelper.syncGet("order/getOrderInfo?$queryParamList")
             val response: Response = httpHelper.syncGet("order/getAllOrders")
@@ -87,15 +87,15 @@ object OrderListController {
                         val orderInfoList = JsonSerializer().toEntity<List<OrderInfo>>(json)
                         orderListValues = orderInfoList
                         updateDisplayedValues(orderListValues)
-                        println("Map updated. Incoming orders count = " + orderInfoList.size)
+                        println("OrderList updated. Incoming orders count = " + orderInfoList.size)
                     }
                 } else {
-                    println("Map does't updated. Bad response")
+                    println("OrderList does't updated. Bad response")
                 }
             }
-
+            println("OrderList updating finished")
         } catch (e : Exception) {
-            println("Error during map update. " + e.message)
+            println("Error during OrderList update. " + e.message)
         }
     }
 
@@ -105,16 +105,22 @@ object OrderListController {
 
     // TODO: Refactor me, pls
     fun displayTracks(orderInfoList: List<OrderInfo>) {
-        ScheduledMapUpdater.mapTracks = ArrayList()
-        Platform.runLater { MapView.Map.mapView.clearMarkersAndTracks() }
-        orderInfoList.forEach { orderInfo ->
-            val points = ArrayList<LatLong>()
-            orderInfo.orderRoute?.routePoints?.forEach { point ->
-                val latLong = LatLong(point.geoPoint!!.latitude!!.toDouble(), point.geoPoint!!.longitude!!.toDouble())
-                points.add(latLong)
+        try {
+            println("Start map updating")
+            ScheduledMapUpdater.mapTracks = ArrayList()
+            Platform.runLater { MapView.Map.mapView.clearMarkersAndTracks() }
+            orderInfoList.forEach { orderInfo ->
+                val points = ArrayList<LatLong>()
+                orderInfo.orderRoute?.routePoints?.forEach { point ->
+                    val latLong = LatLong(point.geoPoint!!.latitude!!.toDouble(), point.geoPoint!!.longitude!!.toDouble())
+                    points.add(latLong)
+                }
+                val track = Track(points, TrackColor.BLUE)
+                Platform.runLater { track.display(MapView.Map.mapView) }
             }
-            val track = Track(points, TrackColor.BLUE)
-            Platform.runLater { track.display(MapView.Map.mapView) }
+            println("Map updating finished")
+        } catch (e: Exception) {
+            println("Error, during map updating: ${e.message}")
         }
     }
 

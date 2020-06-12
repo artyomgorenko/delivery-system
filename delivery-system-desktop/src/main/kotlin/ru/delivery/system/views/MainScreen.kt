@@ -2,6 +2,7 @@ package ru.delivery.system.views
 
 import de.saring.leafletmap.*
 import io.github.rybalkinsd.kohttp.ext.httpGet
+import javafx.application.Platform
 import javafx.scene.layout.BorderPane
 import javafx.scene.paint.Color
 import okhttp3.Response
@@ -11,6 +12,7 @@ import ru.delivery.system.common.navigateToLeft
 import ru.delivery.system.controllers.LoginController
 import ru.delivery.system.controllers.OrderListController
 import ru.delivery.system.executors.ScheduledMapUpdater
+import ru.delivery.system.httpcontrollers.MapUpdater
 import ru.delivery.system.models.json.OrderRoute
 import ru.delivery.system.views.MapView.Map.mapView
 import ru.delivery.system.views.child_screens.DriverScreen
@@ -34,6 +36,7 @@ class MainScreen : View("Main screen") {
 class MapView : View() {
     override val root = BorderPane()
     private val loginController: LoginController by inject()
+    private var mapUpdater: MapUpdater
 
     object Map {
         val mapView = LeafletMapView()
@@ -41,7 +44,7 @@ class MapView : View() {
 
     init {
         ScheduledMapUpdater.runScheduling()
-
+        mapUpdater = MapUpdater()
         with (root) {
             top(MainScreenHeader::class)
             left(OrderListView::class)
@@ -53,7 +56,8 @@ class MapView : View() {
                         MapConfig(
                             layers = listOf(MapLayer.HIKE_BIKE_MAP, MapLayer.OPENSTREETMAP),
                             zoomControlConfig = ZoomControlConfig(true, ControlPosition.BOTTOM_LEFT),
-                            scaleControlConfig = ScaleControlConfig(true, ControlPosition.BOTTOM_LEFT, metric = true)
+                            scaleControlConfig = ScaleControlConfig(true, ControlPosition.BOTTOM_LEFT, metric = true),
+                            initialCenter = LatLong(45.030754, 39.066941)
                         )
                     )
                 }

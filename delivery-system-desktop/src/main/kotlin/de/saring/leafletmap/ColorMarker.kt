@@ -16,5 +16,8 @@ enum class ColorMarker(override val iconName: String) : Marker {
     YELLOW_MARKER("yellowIcon"),
     VIOLET_MARKER("violetIcon"),
     GREY_MARKER("greyIcon"),
-    BLACK_MARKER("blackIcon")
+    BLACK_MARKER("blackIcon"),
+
+    WAREHOUSE_MARKER("warehouseIcon"),
+    TRANSPORT_MARKER("transportIcon")
 }

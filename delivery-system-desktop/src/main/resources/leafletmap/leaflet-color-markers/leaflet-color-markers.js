@@ -77,3 +77,23 @@ var blackIcon = new L.Icon({
 	popupAnchor: [1, -34],
 	shadowSize: [41, 41]
 });
+
+var warehouseIcon = new L.Icon({
+	iconUrl: 'leaflet-color-markers/images/warehouse-icon-green.png',
+	iconRetinaUrl: 'leaflet-color-markers/images/marker-icon-black-2x.png',
+	// shadowUrl: 'leaflet/images/marker-shadow.png',
+	iconSize: [41, 41],
+	iconAnchor: [12, 41],
+	popupAnchor: [1, -34],
+	// shadowSize: [41, 41]
+});
+
+var transportIcon = new L.Icon({
+	iconUrl: 'leaflet-color-markers/images/transport-icon-blue.png',
+	iconRetinaUrl: 'leaflet-color-markers/images/marker-icon-black-2x.png',
+	// shadowUrl: 'leaflet/images/marker-shadow.png',
+	iconSize: [41, 41],
+	iconAnchor: [12, 41],
+	popupAnchor: [1, -34],
+	// shadowSize: [41, 41]
+});
