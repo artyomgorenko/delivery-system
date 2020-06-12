@@ -2,7 +2,7 @@ package ru.delivery.system.common
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import ru.delivery.system.models.MapMarker
+import ru.delivery.system.models.json.MapMarker
 
 class JsonSerializer {
 

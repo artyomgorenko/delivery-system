@@ -1,4 +1,4 @@
-package ru.delivery.system.models
+package ru.delivery.system.models.viewmodels
 
 import javafx.beans.property.SimpleStringProperty
 import tornadofx.*

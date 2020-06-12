@@ -167,12 +167,12 @@ open class LeafletMapView : StackPane() {
     }
 
     /**
-     * Draws a track path along the specified positions in the color red and zooms the map to fit the track perfectly.
+     * Draws a track path along the specified positions in the color red
      *
      * @param positions list of track positions
      * @return variable name of the created track
      */
-    fun addTrack(positions: List<LatLong>): String {
+    fun addTrack(positions: List<LatLong>, color: TrackColor): String {
         val varName = "track${varNameSuffix++}"
 
         val jsPositions = positions
@@ -184,8 +184,7 @@ open class LeafletMapView : StackPane() {
             |$jsPositions
             |];
 
-            |var $varName = L.polyline(latLngs, {color: 'red', weight: 2}).addTo(myMap);
-            |myMap.fitBounds($varName.getBounds());""".trimMargin())
+            |var $varName = L.polyline(latLngs, {color: '${color.color}', weight: 2}).addTo(myMap);""".trimMargin())
         return varName;
     }
 
@@ -195,14 +194,30 @@ open class LeafletMapView : StackPane() {
      * @param positions list of track positions
      * @return variable name of the created track
      */
-    fun addTrackWithMarkers(positions: List<LatLong>): String {
+    fun addTrackWithFocus(positions: List<LatLong>, color: TrackColor): String {
+        val varName = addTrack(positions, color)
+        execScript("""
+            |myMap.fitBounds($varName.getBounds());""".trimMargin())
+        return varName
+    }
+
+    /**
+     * Draws a track path along the specified positions in the color red and zooms the map to fit the track perfectly.
+     *
+     * @param positions list of track positions
+     * @return variable name of the created track
+     */
+    fun addTrackWithMarkers(positions: List<LatLong>, color: TrackColor): String {
         val varName = "track${varNameSuffix++}"
         var postfix = 0
-        positions.forEach { position ->
-            addMarker(position, "$varName-$postfix", ColorMarker.BLACK_MARKER, 0)
-            postfix++
-        }
-        addTrack(positions)
+
+//        positions.forEach { position ->
+//            addMarker(position, "$varName-$postfix", ColorMarker.BLACK_MARKER, 0)
+//            postfix++
+//        }
+
+        addTrack(positions, color)
+        addMarker(positions[positions.lastIndex], "$varName-$postfix", ColorMarker.RED_MARKER, 0)
         return varName;
     }
 
