@@ -1,10 +1,7 @@
 package ru.delivery.system.controller;
 
 import ru.delivery.system.common.enums.OrderStatus;
-import ru.delivery.system.dao.MapRouteManager;
-import ru.delivery.system.dao.OrderManager;
-import ru.delivery.system.dao.TransportManager;
-import ru.delivery.system.dao.UserManager;
+import ru.delivery.system.dao.*;
 import ru.delivery.system.model.entities.*;
 import ru.delivery.system.model.json.RoutePointIncoming;
 import ru.delivery.system.model.json.common.RoutePoint;
@@ -17,13 +14,16 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static ru.delivery.system.common.utils.GeoUtils.calacRouteDistance;
 import static ru.delivery.system.common.utils.JsonSerializer.toEntity;
 import static ru.delivery.system.common.utils.JsonSerializer.toJson;
+import static ru.delivery.system.common.utils.MapUtils.distanceAsDouble;
 
 @Path("order/")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -38,6 +38,8 @@ public class OrderController {
     private UserManager userManager;
     @EJB
     private TransportManager transportManager;
+    @EJB
+    private StockentryManager stockentryManager;
 
     @POST
     @Path("/addOrder")
@@ -184,6 +186,7 @@ public class OrderController {
 
     @POST
     @Path("/changeOrderStatus")
+    @Transactional
     public Response changeOrderStatus(String json) {
         OrderStatusOutgoing orderStatusOutgoing = new OrderStatusOutgoing();
         OrderStatusOutgoing.Header respHeader = new OrderStatusOutgoing.Header();
@@ -213,31 +216,86 @@ public class OrderController {
                 error("Транспорт с id " + requestBody.getTransportId() + " не зарегестрирован в базе");
             }
 
-            if (OrderStatus.IN_PROGRESS.isEqual(requestBody.getNewStatus())) {
-                if (!OrderStatus.NEW.isEqual(orderEntity.getStatus()) || orderEntity.getUser() != null) {
+            if (OrderStatus.PRODUCT_PICKING.isEqual(requestBody.getNewStatus())) {
+                if (!OrderStatus.NEW.isEqual(orderEntity.getStatus())) {
                     error("Заказ не в статусе NEW");
                 }
-                orderEntity.setStatus(OrderStatus.IN_PROGRESS.name());
+                if (orderEntity.getUser() != null) {
+                    error("Заказ закреплен за другим водителем");
+                }
+                orderEntity.setStatus(OrderStatus.PRODUCT_PICKING.name());
                 orderEntity.setTransport(transportEntity);
                 orderEntity.setUser(userEntity);
+                orderEntity.setStartDate(new Timestamp(new Date().getTime()));
 
                 respHeader.setMessage("Заказ взят в работу");
             }
-//            else if (OrderStatus.SHIPMENT.isEqual(requestBody.getNewStatus())) {
-//                TODO: it's new first status after NEW
-//            }
+            else if (OrderStatus.PRODUCT_SHIPMENT.isEqual(requestBody.getNewStatus())) {
+                if (!OrderStatus.PRODUCT_PICKING.isEqual(orderEntity.getStatus())) {
+                    error("Товар уже был отгружен, или заказ еще не взят в работу");
+                }
+                orderEntity.setStatus(OrderStatus.PRODUCT_SHIPMENT.name());
+                orderEntity.setStartShipmentDate(new Timestamp(new Date().getTime()));
+            }
+            else if (OrderStatus.DELIVERING.isEqual(requestBody.getNewStatus())) {
+                if (!OrderStatus.PRODUCT_SHIPMENT.isEqual(orderEntity.getStatus())) {
+                    error("Нельзя начать доставку. Неверный статус заказа");
+                }
+                orderEntity.setStatus(OrderStatus.DELIVERING.name());
+                orderEntity.setStartDeliveringDate(new Timestamp(new Date().getTime()));
+
+                for (OrderDetailsEntity orderDetail : orderEntity.getOrderDetails()) {
+                    Integer productId = orderDetail.getProduct().getId();
+                    Integer warehouseId = orderDetail.getProduct().getId();
+                    stockentryManager.writeoffProduct(productId, warehouseId, orderDetail.getCount());
+                }
+            }
             else if (OrderStatus.DONE.isEqual(requestBody.getNewStatus())) {
-                if (!OrderStatus.IN_PROGRESS.isEqual(orderEntity.getStatus())) {
-                    error("Заказ не может быть завершен. Неверный статус");
+                if (!OrderStatus.DELIVERING.isEqual(orderEntity.getStatus())) {
+                    error("Заказ не может быть завершен. Неверный статус(" + orderEntity.getStatus() + ")");
                 }
                 orderEntity.setStatus(OrderStatus.DONE.name());
+                orderEntity.setDoneDate(new Timestamp(new Date().getTime()));
                 respBody.setDistanceInMeters(100F);
                 respBody.setDeliveryTimeMs(100L);
-//                if (!orderEntity.getOrderMapRoutes().isEmpty()) {
-//                    List<MapRoutePointEntity> routePoints = orderEntity.getOrderMapRoutes().get(0).getMapRouteEntity().getMapRoutePoints();
-//                    for (MapRoutePointEntity routePoint: routePoints) {
-//                    }
-//                }
+
+                // Вычисление длины пути доставки
+                if (!orderEntity.getOrderMapRoutes().isEmpty()) {
+                    List<MapRoutePointEntity> routePoints = orderEntity.getOrderMapRoutes().get(0).getMapRouteEntity().getMapRoutePoints();
+                    GeoPoint prevPoint = null;
+                    Double deliveryDistance = 0.0;
+                    for (MapRoutePointEntity routePoint: routePoints) {
+                        if (prevPoint == null) {
+                            prevPoint = new GeoPoint();
+                            prevPoint.setLatitude(routePoint.getMrpLatitude());
+                            prevPoint.setLongitude(routePoint.getMrpLongitude());
+                            continue;
+                        }
+
+                        //TODO: возможно не стоит плодить новые объекты
+                        GeoPoint currentPoint = new GeoPoint();
+                        currentPoint.setLatitude(prevPoint.getLatitude());
+                        currentPoint.setLongitude(prevPoint.getLongitude());
+                        prevPoint = new GeoPoint();
+                        prevPoint.setLatitude(routePoint.getMrpLatitude());
+                        prevPoint.setLongitude(routePoint.getMrpLongitude());
+
+                        deliveryDistance += distanceAsDouble(prevPoint, currentPoint);
+                    }
+                    respBody.setDeliveryRouteLength(deliveryDistance);
+                }
+                Date startDate = orderEntity.getStartDate();
+                Date startShipmentDate = orderEntity.getStartShipmentDate();
+                Date startDeliveringDate = orderEntity.getStartDeliveringDate();
+                Date doneDate = orderEntity.getDoneDate();
+                Long time = doneDate.getTime() - startDate.getTime();
+                Double totalCost = time.doubleValue() / 1000 / 60 / 60 * 150;
+
+                respBody.setStartDate(orderEntity.getStartDate());
+                respBody.setStartShipmentDate(orderEntity.getStartShipmentDate());
+                respBody.setStartDeliveringDate(orderEntity.getStartDeliveringDate());
+                respBody.setTotalCost(totalCost);
+                respBody.setDoneDate(orderEntity.getDoneDate());
                 respHeader.setMessage("Заказ завершен");
             }
             else if (OrderStatus.CANCELED.isEqual(requestBody.getNewStatus())) {

@@ -1,5 +1,7 @@
 package ru.delivery.system.common.utils;
 
+import ru.delivery.system.model.other.GeoPoint;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Function;

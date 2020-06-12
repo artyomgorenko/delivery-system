@@ -16,6 +16,7 @@ public class OrderStatusOutgoing extends BaseResponse {
     @Getter @Setter
     private Body body;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Body {
         @JsonProperty("orderId")
         @Getter @Setter
@@ -44,17 +45,21 @@ public class OrderStatusOutgoing extends BaseResponse {
         @Getter @Setter
         private GeoPoint deliveryPoint;
 
-        @JsonProperty("startTimestamp")
+        @JsonProperty("startDate")
         @Getter @Setter
-        private Date startTimestamp;
+        private Date startDate;
 
-        @JsonProperty("warehouseTimestamp")
+        @JsonProperty("startShipmentDate")
         @Getter @Setter
-        private Date warehouseTimestamp;
+        private Date startShipmentDate;
 
-        @JsonProperty("deliveryTimestamp")
+        @JsonProperty("startDeliveringDate")
         @Getter @Setter
-        private Date deliveryTimestamp;
+        private Date startDeliveringDate;
+
+        @JsonProperty("doneDate")
+        @Getter @Setter
+        private Date doneDate;
 
         @JsonProperty("wareHouseRouteLength")
         @Getter @Setter
@@ -62,7 +67,7 @@ public class OrderStatusOutgoing extends BaseResponse {
 
         @JsonProperty("deliveryRouteLength")
         @Getter @Setter
-        private Integer deliveryRouteLength;
+        private Double deliveryRouteLength;
 
         @JsonProperty("totalCost")
         @Getter @Setter

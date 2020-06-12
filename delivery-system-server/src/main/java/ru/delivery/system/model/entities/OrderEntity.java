@@ -63,6 +63,22 @@ public class OrderEntity {
     private String status;
 
     @Getter @Setter
+    @Column(name = "O_START_DATE")
+    private Timestamp startDate;
+
+    @Getter @Setter
+    @Column(name = "O_START_SHIPMENT_DATE")
+    private Timestamp startShipmentDate;
+
+    @Getter @Setter
+    @Column(name = "O_START_DELIVERING_DATE")
+    private Timestamp startDeliveringDate;
+
+    @Getter @Setter
+    @Column(name = "O_DONE_DATE")
+    private Timestamp doneDate;
+
+    @Getter @Setter
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderDetailsEntity> orderDetails;
 
