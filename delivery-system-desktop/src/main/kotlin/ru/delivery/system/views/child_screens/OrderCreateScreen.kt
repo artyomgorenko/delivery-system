@@ -14,7 +14,7 @@ import java.time.LocalDate
 /**
  * Modal window for order creation
  */
-class OrderCreateScreen : Fragment("OrderControl") {
+class OrderCreateScreen : Fragment("Новый заказ") {
 
     var selectedProducts: ObservableList<ProductListItem> = FXCollections.observableArrayList<ProductListItem>()
 
@@ -31,7 +31,7 @@ class OrderCreateScreen : Fragment("OrderControl") {
 
     /*For combobox*/
     var productList = PorductListController.productList
-    var productListItem = SimpleObjectProperty<ProductListEntity.Product>(productList.first())
+    var productListItem = SimpleObjectProperty<ProductListEntity.Product>(productList.firstOrNull())
 
 
     override val root = borderpane {

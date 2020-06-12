@@ -23,6 +23,15 @@ class Order {
     val statusProperty = SimpleStringProperty()
     var status by statusProperty
 
+    val departurePointProperty = SimpleStringProperty()
+    var departurePoint by departurePointProperty
+
+    val destinationPointProperty = SimpleStringProperty()
+    var destinationPoint by destinationPointProperty
+
+    val deliveryTimeProperty = SimpleStringProperty()
+    var deliveryTime by deliveryTimeProperty
+
     val completedProperty = SimpleBooleanProperty()
     var completed by completedProperty
 
@@ -33,13 +42,17 @@ class Order {
     var track by trackProperty
 }
 
-class OrderModel : ItemViewModel<Order>() {
-    val order = bind(Order::orderIdProperty)
+class OrderModel(val order: Order) : ItemViewModel<Order>() {
+    val orderId = bind(Order::orderIdProperty)
     val productId = bind(Order::productIdProperty)
     val status = bind(Order::statusProperty)
+    val departurePoint = bind(Order::departurePointProperty)
+    val destinationPoint = bind(Order::destinationPointProperty)
+    val deliveryTime = bind(Order::deliveryTimeProperty)
     val completed = bind(Order::completedProperty)
     val stateColor = bind(Order::stateColorProperty)
 }
+
 
 enum class FilterState { All, InProgress, Completed }
 enum class StateColor(val color: Color) {

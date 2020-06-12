@@ -2,7 +2,6 @@ package ru.delivery.system.views
 
 import de.saring.leafletmap.*
 import io.github.rybalkinsd.kohttp.ext.httpGet
-import javafx.application.Platform
 import javafx.scene.layout.BorderPane
 import javafx.scene.paint.Color
 import okhttp3.Response
@@ -50,22 +49,32 @@ class MapView : View() {
             left(OrderListView::class)
 
             center {
-                stackpane {
-                    children.add(mapView)
-                    mapView.displayMap(
-                        MapConfig(
-                            layers = listOf(MapLayer.HIKE_BIKE_MAP, MapLayer.OPENSTREETMAP),
-                            zoomControlConfig = ZoomControlConfig(true, ControlPosition.BOTTOM_LEFT),
-                            scaleControlConfig = ScaleControlConfig(true, ControlPosition.BOTTOM_LEFT, metric = true),
-                            initialCenter = LatLong(45.030754, 39.066941)
-                        )
-                    )
+                borderpane {
+                    center {
+                        stackpane {
+                            children.add(mapView)
+                            mapView.displayMap(
+                                MapConfig(
+                                    layers = listOf(MapLayer.HIKE_BIKE_MAP, MapLayer.OPENSTREETMAP),
+                                    zoomControlConfig = ZoomControlConfig(true, ControlPosition.BOTTOM_LEFT),
+                                    scaleControlConfig = ScaleControlConfig(true, ControlPosition.BOTTOM_LEFT, metric = true),
+                                    initialCenter = LatLong(45.030754, 39.066941)
+                                )
+                            )
+                        }
+                    }
+                    bottom {
+                        textarea("Type memo here") {
+                            isEditable = false
+                            selectAll()
+                        }
+
+                    }
                 }
             }
 
             bottom {
                 hbox {
-                    button("Создать заказ").action { find<OrderCreateScreen>().openModal() }
                     button("Add marker").action { mapView.addMarker(LatLong(51.1, -0.2), "TEST MARKER", ColorMarker.BLACK_MARKER, 0) }
                     button("Draw orderList route") {
                         style {
@@ -83,7 +92,7 @@ class MapView : View() {
                                         val latLong = LatLong(point.geoPoint!!.latitude!!.toDouble(), point.geoPoint!!.longitude!!.toDouble())
                                         points.add(latLong)
                                     }
-                                    trackName = mapView.addTrackWithMarkers(points, TrackColor.BLUE)
+//                                    trackName = mapView.addTrackWithMarkers(points, TrackColor.BLUE)
                                 }
                             }
                         }
@@ -117,6 +126,8 @@ class OrderListView : View() {
                     field {
                         checkbox("Done") { isSelected = true }
                         checkbox("In progress") { isSelected = true }
+                    }
+                    field {
                         checkbox("Completed") { isSelected = true }
                         checkbox("Canceled") { isSelected = true }
                     }
@@ -127,7 +138,7 @@ class OrderListView : View() {
         left {
             scrollpane {
                 vbox {
-                    children.bind(orderListController.displayedValues) { order ->
+                    children.bind(orderListController.filteredOrders) { order ->
                         titledpane("Order# ${order.orderId}") {
 
                             expandedProperty().addListener { _, _, new ->
@@ -136,7 +147,7 @@ class OrderListView : View() {
                                 } else {
                                     openedOrders.add(order.orderId!!)
                                 }
-                                println(openedOrders.toString())
+                                //println(openedOrders.toString())
                             }
 
                             isExpanded = openedOrders.findLast { it == order.orderId } != null

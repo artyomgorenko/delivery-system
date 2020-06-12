@@ -10,63 +10,76 @@ import ru.delivery.system.common.JsonSerializer
 import ru.delivery.system.executors.ScheduledMapUpdater
 import ru.delivery.system.models.Track
 import ru.delivery.system.models.json.OrderInfo
+import ru.delivery.system.models.viewmodels.Order
 import ru.delivery.system.rest.HttpHelper
 import ru.delivery.system.views.MapView
+import tornadofx.observable
 
 object OrderListController {
 
     private val httpHelper = HttpHelper
 
-    private var orderListValues: List<OrderInfo> = arrayListOf(
+    var allOrders: List<OrderInfo> = arrayListOf(
         OrderInfo().apply {
             orderId = 2
             status = "Completed"
         }
-    )
-    var displayedValues: ObservableList<OrderInfo> = FXCollections.observableArrayList<OrderInfo>()
+    ).observable()
+    var filteredOrders: ObservableList<OrderInfo> = FXCollections.observableArrayList<OrderInfo>()
+
+    fun gerOrderList(): List<Order> {
+        return allOrders.map { orderInfo -> Order().apply {
+            orderInfo.orderId?.let { orderId = it }
+            orderInfo.status?.let { status = it }
+            orderInfo.departurePoint?.let { departurePoint = it }
+            orderInfo.destinationPoint?.let { destinationPoint = it }
+            orderInfo.destinationPoint?.let { destinationPoint = it }
+            deliveryTime = "12:00"
+        } }
+    }
 
     init {
         getOrdersById(arrayListOf(2, 3))
-        updateDisplayedValues(orderListValues)
+        updateDisplayedValues(allOrders)
     }
 
     fun findById(orderId: Int) {
-        updateDisplayedValues(orderListValues.filter { it.orderId == orderId })
+        updateDisplayedValues(allOrders.filter { it.orderId == orderId })
     }
 
     fun findById(orderId: String) {
         try {
             if (orderId.isEmpty()) {
-                updateDisplayedValues(orderListValues)
+                updateDisplayedValues(allOrders)
             } else {
-                updateDisplayedValues(orderListValues.filter { it.orderId == orderId.toInt() })
+                updateDisplayedValues(allOrders.filter { it.orderId == orderId.toInt() })
             }
         } catch (e: NumberFormatException) {
             println(e.message)
-            updateDisplayedValues(orderListValues)
+            updateDisplayedValues(allOrders)
         }
     }
 
     fun findByStatus(orderStatus: String) {
-//        updateDisplayedValues(orderListValues.filter { it.status == orderStatus })
+//        updateDisplayedValues(allOrders.filter { it.status == orderStatus })
     }
 
     @Synchronized
     private fun updateDisplayedValues(values: List<OrderInfo>) {
         Platform.runLater {
-            displayedValues.clear()
-            displayedValues.addAll(values)
+            filteredOrders.clear()
+            filteredOrders.addAll(values)
 
             // remove it
-//            if (displayedValues.isEmpty()) {
-//                displayedValues.addAll(values)
+//            if (filteredOrders.isEmpty()) {
+//                filteredOrders.addAll(values)
 //            } else {
 //                values.forEach { value ->
-//                    displayedValues.forEach { displayedValue ->
+//                    filteredOrders.forEach { displayedValue ->
 //                        if (displayedValue.orderId == value.orderId) {
 //                            displayedValue.update(value)
-//                        } else if (displayedValues.firstOrNull { it.orderId == value.orderId } == null) {
-//                            displayedValues.add(value)
+//                        } else if (filteredOrders.firstOrNull { it.orderId == value.orderId } == null) {
+//                            filteredOrders.add(value)
 //                        }
 //                    }
 //                }
@@ -74,7 +87,7 @@ object OrderListController {
         }
     }
 
-    fun getOrdersById(orderIdList: List<Int> = displayedValues.map { it.orderId!! } ) {
+    fun getOrdersById(orderIdList: List<Int> = filteredOrders.map { it.orderId!! } ) {
         try {
             println("Start orderList updating")
             val queryParamList = orderIdList.joinToString(separator = "&") {"orderIdList=$it"} // [1,2,3]
@@ -85,8 +98,8 @@ object OrderListController {
                 if (response.isSuccessful) {
                     response.body()?.string()?.let { json ->
                         val orderInfoList = JsonSerializer().toEntity<List<OrderInfo>>(json)
-                        orderListValues = orderInfoList
-                        updateDisplayedValues(orderListValues)
+                        allOrders = orderInfoList
+                        updateDisplayedValues(allOrders)
                         println("OrderList updated. Incoming orders count = " + orderInfoList.size)
                     }
                 } else {
@@ -100,7 +113,7 @@ object OrderListController {
     }
 
     fun displayTracks() {
-        displayTracks(displayedValues)
+        displayTracks(filteredOrders)
     }
 
     // TODO: Refactor me, pls

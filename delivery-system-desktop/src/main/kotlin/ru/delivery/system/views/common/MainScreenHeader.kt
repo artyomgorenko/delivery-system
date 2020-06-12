@@ -7,6 +7,7 @@ import ru.delivery.system.controllers.LoginController
 import ru.delivery.system.models.viewmodels.UserModel
 import ru.delivery.system.views.child_screens.DriverScreen
 import ru.delivery.system.views.child_screens.OrderScreen
+import ru.delivery.system.views.child_screens.ProductScreen
 import ru.delivery.system.views.child_screens.ReportScreen
 import tornadofx.*
 import tornadofx.getValue
@@ -27,9 +28,11 @@ class MainScreenHeader : View() {
 
             left {
                 hbox {
-                    button("Driver screen") { action { navigateToLeft<DriverScreen>() } }
-                    button("Order screen") { action { navigateToLeft<OrderScreen>() } }
-                    button("Report screen") { action { navigateToLeft<ReportScreen>() } }
+                    button("Заказы") { action { navigateToLeft<OrderScreen>() } }
+                    button("Товары") { action { navigateToLeft<ProductScreen>() } }
+                    button("Пользователи") { action { navigateToLeft<DriverScreen>() } }
+                    button("Транспорт") { action { navigateToLeft<DriverScreen>() } }
+                    button("Отчетность") { action { navigateToLeft<ReportScreen>() } }
                 }
             }
             right {
@@ -37,7 +40,7 @@ class MainScreenHeader : View() {
                     label("Logged as:") {
                         userName.onChange { text = "Logged as: $it"}
                     }
-                    button("Log out").action(loginController::logout)
+                    button("Sing out").action(loginController::logout)
                 }
             }
         }
