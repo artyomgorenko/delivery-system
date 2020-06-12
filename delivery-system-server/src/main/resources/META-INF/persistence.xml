@@ -7,11 +7,21 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <jta-data-source>java:/PostgresDS</jta-data-source>
 
-        <class>ru.delivery.system.model.entities.HermesMapMarker</class>
+        <class>ru.delivery.system.model.entities.MapMarkerEntity</class>
+        <class>ru.delivery.system.model.entities.MapRoutePointEntity</class>
+        <class>ru.delivery.system.model.entities.MapRouteEntity</class>
         <properties>
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />
             <property name="hibernate.hbm2ddl.auto" value="update" />
+            <property name="toplink.jdbc.url" value="jdbc:postgresql://localhost:5432/delivery_system"/>
+            <property name="toplink.jdbc.driver" value="org.postgresql.Driver"/>
+            <property name="hibernate.connection.url" value="jdbc:postgresql://localhost:5432/delivery_system"/>
+            <property name="hibernate.connection.driver_class" value="org.postgresql.Driver"/>
+            <property name="openjpa.ConnectionURL" value="jdbc:postgresql://localhost:5432/delivery_system"/>
+            <property name="openjpa.ConnectionDriverName" value="org.postgresql.Driver"/>
+            <property name="eclipselink.jdbc.url" value="jdbc:postgresql://localhost:5432/delivery_system"/>
+            <property name="eclipselink.jdbc.driver" value="org.postgresql.Driver"/>
 
         </properties>
     </persistence-unit>

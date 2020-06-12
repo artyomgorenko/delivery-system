@@ -9,12 +9,13 @@ import javax.persistence.*;
  * Entity for map testing purposes
  */
 @Entity
-@Table(name = "map_markers")
-public class HermesMapMarker {
+@Table(name = "MAP_MARKERS")
+public class MapMarkerEntity {
 
     @Id
     @Column(name = "M_ID")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.SEQUENCE, generator = "GEN_MAP_MARKERS")
+    @SequenceGenerator(name="GEN_MAP_MARKERS", sequenceName = "MAP_MARKERS_M_ID_SEQ", allocationSize = 1)
     @Getter @Setter
     private int markerId;
 

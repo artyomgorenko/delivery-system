@@ -2,7 +2,7 @@ package ru.delivery.system.controller;
 
 import ru.delivery.system.common.JsonSerializer;
 import ru.delivery.system.dao.MapMarkerManager;
-import ru.delivery.system.model.entities.HermesMapMarker;
+import ru.delivery.system.model.entities.MapMarkerEntity;
 import ru.delivery.system.model.json.MapMarkerIncoming;
 
 import javax.ejb.EJB;
@@ -39,12 +39,11 @@ public class MapController {
     @Path("/getMarkers")
     public Response getMarkers() {
         try {
-            List<HermesMapMarker> mapMarkers = markerManager.getMapMarkers();
+            List<MapMarkerEntity> mapMarkers = markerManager.getMapMarkers();
             return Response.status(Response.Status.OK).entity(JsonSerializer.toJson(mapMarkers)).build();
         } catch (Exception e) {
             String jsonMessage = "{\"Error\":\"" + e.getMessage() + "\"}";
             return Response.status(Response.Status.OK).entity(jsonMessage).build();
         }
     }
-
 }
