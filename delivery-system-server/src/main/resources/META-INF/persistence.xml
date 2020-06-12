@@ -10,6 +10,7 @@
         <class>ru.delivery.system.model.entities.MapMarkerEntity</class>
         <class>ru.delivery.system.model.entities.MapRoutePointEntity</class>
         <class>ru.delivery.system.model.entities.MapRouteEntity</class>
+        <class>ru.delivery.system.model.entities.UsersEntity</class>
         <properties>
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />

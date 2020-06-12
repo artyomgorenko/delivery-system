@@ -9,6 +9,7 @@ import ru.delivery.system.model.json.OrderIncoming;
 import ru.delivery.system.model.json.OrderMarkerIncoming;
 import ru.delivery.system.model.json.OrderOutgoing;
 import ru.delivery.system.model.json.OrderRouteOutgoing;
+import ru.delivery.system.model.other.GeoPoint;
 
 import javax.ejb.EJB;
 import javax.ws.rs.*;
@@ -17,7 +18,9 @@ import javax.ws.rs.core.Response;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static ru.delivery.system.common.GeoUtils.calacRouteDistance;
 import static ru.delivery.system.common.JsonSerializer.toEntity;
 import static ru.delivery.system.common.JsonSerializer.toJson;
 
@@ -85,14 +88,19 @@ public class OrderController {
             List<OrderRouteOutgoing.RoutePoint> routePoints = new ArrayList<>();
             for (MapRoutePointEntity pointEntity: mapRoutePoints) {
                 OrderRouteOutgoing.RoutePoint routePoint = new OrderRouteOutgoing.RoutePoint();
+                GeoPoint geoPoint = new GeoPoint();
                 routePoint.setSerialNumber(pointEntity.getMrpSerialNumber());
-                routePoint.setLatitude(pointEntity.getMrpLatitude());
-                routePoint.setLongitude(pointEntity.getMrpLongitude());
+                geoPoint.setLatitude(pointEntity.getMrpLatitude());
+                geoPoint.setLongitude(pointEntity.getMrpLongitude());
+                routePoint.setGeoPoint(geoPoint);
                 routePoints.add(routePoint);
             }
+
             OrderRouteOutgoing orderRouteOutgoing = new OrderRouteOutgoing();
             orderRouteOutgoing.setOrderId(orderId);
             orderRouteOutgoing.setRoutePoints(routePoints);
+            List<GeoPoint> geoPoints = routePoints.stream().map(OrderRouteOutgoing.RoutePoint::getGeoPoint).collect(Collectors.toList());
+            orderRouteOutgoing.setRouteDistance(calacRouteDistance(geoPoints));
 
             return Response.status(Response.Status.OK).entity(toJson(orderRouteOutgoing)).build();
         } catch (Exception e) {
