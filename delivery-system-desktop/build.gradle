@@ -13,6 +13,7 @@ dependencies {
     compile "no.tornado:tornadofx:1.7.15"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.7"
+    compile "org.apache.poi:poi-ooxml:3.17"
     implementation 'com.squareup.okhttp3:okhttp:3.12.0'
     compile 'io.github.rybalkinsd:kohttp:0.7.1'
 }

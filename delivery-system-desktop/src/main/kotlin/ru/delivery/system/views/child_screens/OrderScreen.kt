@@ -1,6 +1,7 @@
 package ru.delivery.system.views.child_screens
 
 import javafx.beans.property.SimpleStringProperty
+import ru.delivery.system.common.ExcelUtils
 import ru.delivery.system.controllers.OrderListController
 import ru.delivery.system.models.viewmodels.Order
 import ru.delivery.system.models.viewmodels.OrderModel
@@ -93,7 +94,7 @@ class OrderScreen : View("Заказы") {
                     }
                     hbox {
                         spacingProperty().set(5.0)
-                        button("Создать ТТН")
+                        button("Создать ТТН").action { ExcelUtils().createTtnDoc() }
                         button("Создать Путевой лист")
                     }
                 }
