@@ -1,4 +1,4 @@
-package ru.delivery.system.common;
+package ru.delivery.system.common.utils;
 
 import ru.delivery.system.model.other.GeoPoint;
 

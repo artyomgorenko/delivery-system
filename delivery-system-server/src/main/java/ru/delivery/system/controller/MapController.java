@@ -1,6 +1,6 @@
 package ru.delivery.system.controller;
 
-import ru.delivery.system.common.JsonSerializer;
+import ru.delivery.system.common.utils.JsonSerializer;
 import ru.delivery.system.dao.MapMarkerManager;
 import ru.delivery.system.model.entities.MapMarkerEntity;
 import ru.delivery.system.model.json.MapMarkerIncoming;

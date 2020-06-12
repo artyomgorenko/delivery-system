@@ -1,4 +1,4 @@
-package ru.delivery.system.model.json;
+package ru.delivery.system.model.json.order;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;

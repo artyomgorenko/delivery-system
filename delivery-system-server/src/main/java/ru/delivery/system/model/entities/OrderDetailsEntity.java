@@ -4,7 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 
+/**
+ * Строка заказа
+ */
 @Entity
 @Table(name = "order_details", schema = "public", catalog = "delivery_system")
 public class OrderDetailsEntity {
@@ -15,8 +19,26 @@ public class OrderDetailsEntity {
     @Getter @Setter
     private int odId;
 
+    /**
+     * Количество товара
+     */
+    @Getter @Setter
+    @Column(name = "od_count")
+    private Integer count;
+
+    /**
+     * Ссылка на заказ
+     */
     @ManyToOne
     @JoinColumn(name = "odo_id", referencedColumnName = "o_id", nullable = false)
     @Getter @Setter
     private OrderEntity order;
+
+    /**
+     * Ссылка на продукт
+     */
+    @ManyToOne
+    @JoinColumn(name = "od_product_id", referencedColumnName = "p_id")
+    @Getter @Setter
+    private ProductEntity product;
 }

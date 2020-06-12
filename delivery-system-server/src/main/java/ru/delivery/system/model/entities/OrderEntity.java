@@ -5,7 +5,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Заказ
@@ -31,10 +31,33 @@ public class OrderEntity {
     private Timestamp createDate;
 
     @Getter @Setter
-    @OneToMany(mappedBy = "order")
-    private Collection<OrderDetailsEntity> orderDetails;
+    @Column(name = "o_departure_point")
+    private String departurePoint;
 
     @Getter @Setter
-    @OneToMany(mappedBy = "mapRouteEntity")
-    private Collection<OrderMapRouteEntity> orderMapRoutes;
+    @Column(name = "o_destination_point")
+    private String destinationPoint;
+
+    @Getter @Setter
+    @Column(name = "O_STATUS")
+    private String status;
+
+    @Getter @Setter
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<OrderDetailsEntity> orderDetails;
+
+    @Getter @Setter
+    @OneToMany(mappedBy = "mapRouteEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<OrderMapRouteEntity> orderMapRoutes;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "o_driver_id", referencedColumnName = "u_id", nullable = false)
+    @Getter @Setter
+    private UserEntity user;
+
+    @ManyToOne
+    @JoinColumn(name = "o_transport_id", referencedColumnName = "t_id", nullable = false)
+    @Getter @Setter
+    private TransportEntity transport;
+
 }

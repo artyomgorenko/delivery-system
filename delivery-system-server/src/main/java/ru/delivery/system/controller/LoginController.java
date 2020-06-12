@@ -1,7 +1,7 @@
 package ru.delivery.system.controller;
 
 import ru.delivery.system.dao.UserManager;
-import ru.delivery.system.model.entities.UsersEntity;
+import ru.delivery.system.model.entities.UserEntity;
 import ru.delivery.system.model.json.LoginIncoming;
 import ru.delivery.system.model.json.LoginOutgoing;
 
@@ -16,8 +16,8 @@ import javax.ws.rs.core.Response;
 
 import java.util.UUID;
 
-import static ru.delivery.system.common.JsonSerializer.toEntity;
-import static ru.delivery.system.common.JsonSerializer.toJson;
+import static ru.delivery.system.common.utils.JsonSerializer.toEntity;
+import static ru.delivery.system.common.utils.JsonSerializer.toJson;
 
 @Path("user/")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -29,20 +29,20 @@ public class LoginController {
 
     @POST
     @Path("login/")
-    public Response addOrder(String json) {
+    public Response login(String json) {
         LoginOutgoing loginOutgoing = new LoginOutgoing();
         try {
             LoginIncoming loginIncoming = toEntity(json, LoginIncoming.class);
             String username = loginIncoming.getUsername();
             String password = loginIncoming.getPassword();
 
-            UsersEntity usersEntity = userManager.findUser(username, password);
-            if (usersEntity == null) {
+            UserEntity userEntity = userManager.findUser(username, password);
+            if (userEntity == null) {
                 loginOutgoing.setErrorMessage("Неверная пара логин-пароль");
             } else if (loginOutgoing.getErrorMessage() == null) {
-                loginOutgoing.setName(usersEntity.getName());
-                loginOutgoing.setSurname(usersEntity.getSurname());
-                loginOutgoing.setRole(usersEntity.getRole());
+                loginOutgoing.setName(userEntity.getName());
+                loginOutgoing.setSurname(userEntity.getSurname());
+                loginOutgoing.setRole(userEntity.getRole());
                 loginOutgoing.setSessionId(UUID.randomUUID().toString());
                 loginOutgoing.setAppAdmin(false);
             }

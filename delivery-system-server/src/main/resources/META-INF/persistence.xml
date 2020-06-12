@@ -10,11 +10,13 @@
         <class>ru.delivery.system.model.entities.MapMarkerEntity</class>
         <class>ru.delivery.system.model.entities.MapRoutePointEntity</class>
         <class>ru.delivery.system.model.entities.MapRouteEntity</class>
-        <class>ru.delivery.system.model.entities.UsersEntity</class>
-        <class>ru.delivery.system.common.ProductEntity</class>
-        <class>ru.delivery.system.common.TransportEntity</class>
+        <class>ru.delivery.system.model.entities.UserEntity</class>
+        <class>ru.delivery.system.model.entities.ProductEntity</class>
+        <class>ru.delivery.system.model.entities.TransportEntity</class>
         <class>ru.delivery.system.common.OrderEntity</class>
         <class>ru.delivery.system.common.OrderDetailsEntity</class>
+        <class>ru.delivery.system.common.UsersEntity</class>
+        <class>ru.delivery.system.common.ProductEntity</class>
         <properties>
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />

@@ -2,11 +2,11 @@ package ru.delivery.system.dao;
 
 import ru.delivery.system.model.entities.MapRouteEntity;
 import ru.delivery.system.model.entities.MapRoutePointEntity;
-import ru.delivery.system.model.json.OrderMarkerIncoming;
+import ru.delivery.system.model.json.order.OrderMarkerIncoming;
+import ru.delivery.system.model.json.order.RoutePointIncoming;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
@@ -29,13 +29,25 @@ public class MapRouteManager {
         return null;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void createMapRoutePoint(MapRouteEntity mapRouteEntity, OrderMarkerIncoming orderMarker) {
+    @TransactionAttribute
+    public void createRoutePoint(MapRouteEntity mapRouteEntity, OrderMarkerIncoming orderMarker) {
         MapRoutePointEntity mapRoutePointEntity = new MapRoutePointEntity();
         mapRoutePointEntity.setMrpMrId(mapRouteEntity.getMrId());
         mapRoutePointEntity.setMrpSerialNumber(orderMarker.getSerialNumber());
         mapRoutePointEntity.setMrpLatitude(orderMarker.getLatitude());
         mapRoutePointEntity.setMrpLongitude(orderMarker.getLongitude());
+        em.persist(mapRoutePointEntity);
+        em.flush();
+    }
+
+    @TransactionAttribute
+    public void createRoutePoint(Integer orderId, RoutePointIncoming routePointIncoming) {
+        MapRouteEntity mapRouteEntity = getMapRouteByOrderId(orderId);
+        MapRoutePointEntity mapRoutePointEntity = new MapRoutePointEntity();
+        mapRoutePointEntity.setMrpMrId(mapRouteEntity.getMrId());
+        mapRoutePointEntity.setMrpSerialNumber(routePointIncoming.getSerialNumber());
+        mapRoutePointEntity.setMrpLatitude(routePointIncoming.getGeoPoint().getLatitude());
+        mapRoutePointEntity.setMrpLongitude(routePointIncoming.getGeoPoint().getLongitude());
         em.persist(mapRoutePointEntity);
         em.flush();
     }

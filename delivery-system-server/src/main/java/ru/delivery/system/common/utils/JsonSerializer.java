@@ -1,4 +1,4 @@
-package ru.delivery.system.common;
+package ru.delivery.system.common.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
