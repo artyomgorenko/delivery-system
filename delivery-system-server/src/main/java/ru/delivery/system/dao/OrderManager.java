@@ -82,7 +82,7 @@ public class OrderManager {
     public OrderEntity getOrderById(Integer orderId) {
         return em.createQuery("select o from OrderEntity o where o.oId = :orderId", OrderEntity.class)
                 .setParameter("orderId", orderId)
-                .getSingleResult();
+                .getResultList().stream().findFirst().orElse(null);
     }
 
     @TransactionAttribute
@@ -91,5 +91,20 @@ public class OrderManager {
                 .getResultList();
     }
 
+    @TransactionAttribute
+    public List<OrderEntity> getNewOrders() {
+        return em.createQuery("select o from OrderEntity o " +
+                "where o.status=:orderStatus", OrderEntity.class)
+                .setParameter("orderStatus", OrderStatus.NEW.toString())
+                .getResultList();
+    }
+
+    @TransactionAttribute
+    public List<OrderEntity> getDriverOrders(UserEntity user) {
+        return em.createQuery("select o from OrderEntity o " +
+                "where o.user=:user", OrderEntity.class)
+                .setParameter("user", user)
+                .getResultList();
+    }
 
 }

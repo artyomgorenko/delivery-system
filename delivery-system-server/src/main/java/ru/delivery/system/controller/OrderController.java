@@ -85,14 +85,48 @@ public class OrderController {
     @Transactional
     public Response getAllOrders() {
         try {
-            List<OrderInfoOutgoing> orders = orderManager.getOrders().stream()
-                    .map(this::constructOrderOutgoing)
-                    .collect(Collectors.toList());
+            List<OrderInfoOutgoing> orders = constructOrderOutgoingList(orderManager.getOrders());
             return Response.status(Response.Status.OK).entity(toJson(orders)).build();
         } catch (Exception e) {
             String jsonMessage = "{\"Error\":\"" + e.getMessage() + "\"}";
             return Response.status(Response.Status.OK).entity(jsonMessage).build();
         }
+    }
+
+    @GET
+    @Path("/getNewOrders")
+    @Transactional
+    public Response getNewOrders() {
+        try {
+            List<OrderInfoOutgoing> orders = constructOrderOutgoingList(orderManager.getNewOrders());
+            return Response.status(Response.Status.OK).entity(toJson(orders)).build();
+        } catch (Exception e) {
+            String jsonMessage = "{\"Error\":\"" + e.getMessage() + "\"}";
+            return Response.status(Response.Status.OK).entity(jsonMessage).build();
+        }
+    }
+
+    @GET
+    @Path("/getDriverOrders")
+    @Transactional
+    public Response getNewOrders(@QueryParam("") int driverId) {
+        try {
+            UserEntity user = userManager.getUserById(driverId);
+            if (user == null) {
+                error("Пользователь с id=" + driverId + " не найден");
+            }
+            List<OrderInfoOutgoing> orders = constructOrderOutgoingList(orderManager.getDriverOrders(user));
+            return Response.status(Response.Status.OK).entity(toJson(orders)).build();
+        } catch (Exception e) {
+            String jsonMessage = "{\"Error\":\"" + e.getMessage() + "\"}";
+            return Response.status(Response.Status.OK).entity(jsonMessage).build();
+        }
+    }
+
+    private List<OrderInfoOutgoing> constructOrderOutgoingList(List<OrderEntity> orderEntities) {
+        return orderEntities.stream()
+                .map(this::constructOrderOutgoing)
+                .collect(Collectors.toList());
     }
 
     private OrderInfoOutgoing constructOrderOutgoing(OrderEntity orderEntity) {
