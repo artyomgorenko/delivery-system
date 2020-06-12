@@ -1,7 +1,4 @@
-package ru.delivery.system;
-
-import lombok.Getter;
-import lombok.Setter;
+package ru.delivery.system.service;
 
 import javax.ejb.Stateless;
 

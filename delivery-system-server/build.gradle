@@ -17,7 +17,19 @@ dependencies {
     // The following dependencies will be the ear modules and
     // will be placed in the ear root
     // deploy project(':war')
-    compile group: 'org.hibernate', name: 'hibernate-core', version: '5.4.2.Final'
+    providedCompile 'org.hibernate:hibernate-core:5.4.2.Final'
+    providedCompile 'org.hibernate:hibernate-jpamodelgen:5.4.2.Final'
+    providedCompile 'org.hibernate:hibernate-entitymanager:5.4.2.Final'
+    providedCompile 'org.hibernate:hibernate-validator:5.4.2.Final'
+    providedCompile 'org.hibernate:hibernate-ehcache:5.4.2.Final'
+    providedCompile 'org.hibernate.common:hibernate-commons-annotations:5.0.3.Final'
+    providedCompile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
+
+    providedCompile "com.fasterxml.jackson.core:jackson-core:2.9.0"
+    providedCompile "com.fasterxml.jackson.core:jackson-annotations:2.9.0"
+    providedCompile "com.fasterxml.jackson.core:jackson-databind:2.9.0"
+    providedCompile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.0"
+
     compile group: 'javax', name: 'javaee-api', version: '8.0'
     compile 'org.projectlombok:lombok:1.18.6'
 
