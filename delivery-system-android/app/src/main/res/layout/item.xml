@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="data"
+            type="ru.delivery.system.android.models.OrderData"/>
+        <variable
+            name="handler"
+            type="ru.delivery.system.android.handlers.ButtonHandler"/>
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:onClick="@{(view) -> handler.showOrderDetails(view, data)}">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{String.valueOf(data.id)}"
+        />
+        <TextView
+            android:layout_marginStart="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{String.valueOf(data.description)}" />
+    </RelativeLayout>
+</layout>
