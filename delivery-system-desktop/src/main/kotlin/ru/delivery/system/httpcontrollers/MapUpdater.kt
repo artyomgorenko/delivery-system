@@ -46,6 +46,7 @@ class MapUpdater {
                     } else {
                         println("Warehouses updating failed: Bad response")
                     }
+                    response.close()
                 }
             })
         } catch (e: Exception) {
@@ -78,6 +79,7 @@ class MapUpdater {
                     } else {
                         println("Transport updating failed: Bad response")
                     }
+                    response.close()
                 }
             })
         } catch (e: Exception) {

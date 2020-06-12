@@ -20,15 +20,17 @@ object CargoListController {
 
     fun updateCargoList() {
         try {
-            val response = httpHelper.syncGet("cargo/cargoList")
-            if (response.isSuccessful) {
-                response.body()?.let { body ->
-                    val cargoInfoList = jsonSerializer.toEntity<CargoInfoResponse>(body.string())
-                    cargoInfoList.cargoList?.let { cargoList = it }
-                    println("Initialize cargo list. Size=${cargoList.size}")
+            val resp = httpHelper.syncGet("cargo/cargoList")
+            resp.use { response ->
+                if (response.isSuccessful) {
+                    response.body()?.let { body ->
+                        val cargoInfoList = jsonSerializer.toEntity<CargoInfoResponse>(body.string())
+                        cargoInfoList.cargoList?.let { cargoList = it }
+                        println("Initialize cargo list. Size=${cargoList.size}")
+                    }
+                } else {
+                    println("Failed to INITIALIZE cargo list")
                 }
-            } else {
-                println("Failed to INITIALIZE cargo list")
             }
         } catch (e: Exception) {
             println("Cargo list initialization error: ${e.message}")
