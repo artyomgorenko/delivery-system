@@ -1,6 +1,5 @@
 package ru.delivery.system.views.child_screens
 
-import javafx.scene.control.Tooltip
 import ru.delivery.system.common.ExcelUtils
 import ru.delivery.system.controllers.OrderListController
 import ru.delivery.system.models.json.OrderInfo
@@ -99,11 +98,21 @@ class OrderScreen : View("Заказы") {
                         spacingProperty().set(5.0)
                         button("Создать ТТН") {
                             tooltip("Создание документа товаро транспортная накладная. Документ будет сохранен папке documents")
-                            action{ExcelUtils().createTtnDoc()}
+                            action {
+                                val docUri = ExcelUtils().createTtnDoc()
+                                val view = find<DocumentPreview>()
+                                view.uriString(docUri)
+                                view.openModal()
+                            }
                         }
                         button("Создать Путевой лист") {
-                            action{ExcelUtils().createTtnDoc()}
                             tooltip("Создание документа Путевой лист. Документ будет сохранен папке documents")
+                            action {
+                                val docUri = ExcelUtils().createWayListDoc()
+                                val view = find<DocumentPreview>()
+                                view.uriString("way_list.png")
+                                view.openModal()
+                            }
                         }
                     }
                 }
