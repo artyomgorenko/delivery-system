@@ -6,6 +6,7 @@ import javafx.scene.web.WebView
 
 import java.net.URL
 import javafx.concurrent.Worker
+import tornadofx.form
 import java.util.concurrent.CompletableFuture
 
 
@@ -164,6 +165,16 @@ open class LeafletMapView : StackPane() {
      */
     fun removeMarker(markerName: String) {
         execScript("myMap.removeLayer($markerName);")
+    }
+
+    fun removeLayers(vararg markerNames: String) {
+        try {
+            for (markerName in markerNames) {
+                execScript("myMap.removeLayer($markerName);")
+            }
+        } catch (e: Exception) {
+            println("Remove layers exception. ${e.localizedMessage}" )
+        }
     }
 
     /**

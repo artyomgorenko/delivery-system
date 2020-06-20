@@ -58,11 +58,20 @@ public class OrderManager {
 
         OrderEntity orderEntity = new OrderEntity();
         orderEntity.setCreateDate(new Timestamp(orderIncoming.getCreateDate().getTime()));
+        
         orderEntity.setDeparturePoint(orderIncoming.getDeparturePoint());
+        orderEntity.setDepartureLongitude(orderIncoming.getDepartureLongitude());
+        orderEntity.setDepartureLatitude(orderIncoming.getDepartureLatitude());
+        
         orderEntity.setDestinationPoint(orderIncoming.getDestinationPoint());
+        orderEntity.setDestinationLongitude(orderIncoming.getDestinationLongitude());
+        orderEntity.setDestinationLatitude(orderIncoming.getDestinationLatitude());
+        
         orderEntity.setStatus(OrderStatus.NEW.name());
+        orderEntity.setType(orderIncoming.getIsOrderCommon() ? "COMMON" : "INTERNAL");
         orderEntity.setTransport(transportEntity);
         orderEntity.setUser(userEntity);
+        orderEntity.setBaseCost(orderIncoming.getBaseCost());
         em.persist(orderEntity);
 
         // Order details

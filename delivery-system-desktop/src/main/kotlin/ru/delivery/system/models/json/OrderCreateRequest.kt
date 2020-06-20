@@ -5,32 +5,65 @@ import java.util.*
 
 class OrderCreateRequest {
 
-    @JsonProperty(value = "createDate")
+    @JsonProperty("createDate")
     var createDate: Date? = null
 
-    @JsonProperty(value = "driverId")
+    @JsonProperty("driverId")
     var driverId: Int? = null
 
-    @JsonProperty(value = "transportId")
+    @JsonProperty("transportId")
     var transportId: Int? = null
 
-    @JsonProperty(value = "departurePoint")
+    /**
+     * Адрес пункта отправления
+     */
+    @JsonProperty("departurePoint")
     var departurePoint: String? = null
 
-    @JsonProperty(value = "destinationPoint")
+    @JsonProperty("departureLatitude")
+    var departureLatitude: Float? = null
+
+    @JsonProperty("departureLongitude")
+    var departureLongitude: Float? = null
+
+    /**
+     * Адрес пункта прибытия
+     */
+    @JsonProperty("destinationPoint")
     var destinationPoint: String? = null
+
+    @JsonProperty("destinationLatitude")
+    var destinationLatitude: Float? = null
+
+    @JsonProperty("destinationLongitude")
+    var destinationLongitude: Float? = null
+
+    /**
+     * Дополнительная информация
+     */
+    @JsonProperty("deliveryDate")
+    var deliveryDate: Date? = null
+    
+    @JsonProperty("isOrderCommon")
+    var isOrderCommon: Boolean? = null
+
+    @JsonProperty("deliveryUrgency")
+    var deliveryUrgency: String? = null
+
+    @JsonProperty("baseCost")
+    var baseCost: Float? = null
 
     /**
      * Список продуктов в заказе
      */
-    @JsonProperty(value = "productList")
+    @JsonProperty("productList")
     var productList: List<Product>? = null
 
     class Product {
-        @JsonProperty(value = "productId")
+        @JsonProperty("productId")
         var productId: Int? = null
 
-        @JsonProperty(value = "count")
+        @JsonProperty("count")
         var count: Int? = null
 
     }

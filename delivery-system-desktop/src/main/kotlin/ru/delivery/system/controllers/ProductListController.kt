@@ -13,15 +13,17 @@ object ProductListController {
 
     init {
         try {
-            val response = httpHelper.syncGet("product/productList")
-            if (response.isSuccessful) {
-                response.body()?.let { body ->
-                    val productListEntity = jsonSerializer.toEntity<ProductListEntity>(body.string())
-                    productList = productListEntity.productList!!
-                    println("Initialize product list. Size=${productList.size}")
+            val resp = httpHelper.syncGet("product/productList")
+            resp.use { response ->
+                if (response.isSuccessful) {
+                    response.body()?.let { body ->
+                        val productListEntity = jsonSerializer.toEntity<ProductListEntity>(body.string())
+                        productList = productListEntity.productList!!
+                        println("Initialize product list. Size=${productList.size}")
+                    }
+                } else {
+                    println("Failed to initialize product list")
                 }
-            } else {
-                println("Failed to initialize product list")
             }
         } catch (e: Exception) {
             println("Product list initialization error: ${e.message}")

@@ -5,12 +5,19 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
+import javafx.scene.control.ComboBox
+import javafx.scene.control.TextField
 import javafx.scene.paint.Color
+import ru.delivery.system.common.getCoordsFromAddress
 import ru.delivery.system.controllers.OrderController
 import ru.delivery.system.controllers.ProductListController
+import ru.delivery.system.models.json.OrderCreateRequest
 import ru.delivery.system.models.json.ProductListEntity
 import tornadofx.*
 import java.time.LocalDate
+import java.time.ZoneId
+import java.util.*
+
 
 /**
  * Modal window for order creation
@@ -24,7 +31,11 @@ class OrderCreateScreen : Fragment("Новый заказ") {
     private val model = ViewModel()
     private val departure = model.bind { SimpleStringProperty() }
     private val destination = model.bind { SimpleStringProperty() }
-    private val deliveryDate = model.bind { SimpleObjectProperty<LocalDate>() }
+    private val deliveryDateField = model.bind { SimpleObjectProperty<LocalDate>() }
+    private lateinit var comboboxOrderType: ComboBox<String>
+    private lateinit var comboboxDeliveryUrgency: ComboBox<String>
+    private lateinit var departureAddressField: TextField
+    private lateinit var destinationAddressField: TextField
 
     private val totalCost = doubleBinding(selectedProducts) {
         selectedProducts.sumByDouble { it.cost * it.count }
@@ -32,9 +43,10 @@ class OrderCreateScreen : Fragment("Новый заказ") {
     private val totalWeight = doubleBinding(selectedProducts) {
         selectedProducts.sumByDouble { it.weight * it.count }
     }
-    private val minSquare = doubleBinding(selectedProducts) {
+    private val totalVolume = doubleBinding(selectedProducts) {
         selectedProducts.sumByDouble { it.width * it.length * it.count }
     }
+
 
     /*For combobox*/
     var productList = ProductListController.productList
@@ -44,8 +56,8 @@ class OrderCreateScreen : Fragment("Новый заказ") {
     override val root = borderpane {
         prefHeight = 400.0
         center {
-            label("Создание заказа")
 
+            label("Создание заказа")
             form {
                 style {
                     backgroundColor += Color.WHITE
@@ -53,30 +65,30 @@ class OrderCreateScreen : Fragment("Новый заказ") {
 
                 fieldset {
                     field("Адрес отправления") {
-                        textfield(departure) {
+                        departureAddressField = textfield(departure) {
                             required(ValidationTrigger.OnChange(), "Адрес отправления - обязательное поле")
-                            text = "г. Краснодар ул. Тюляева 2"
+                            text = "Краснодар Тюляева 2"
                         }
                     }
                     field("Адрес доставки") {
-                        textfield(destination) {
+                        destinationAddressField = textfield(destination) {
                             required(ValidationTrigger.OnChange(), "Адрес доставки - обязательное поле")
-                            text = "г. Краснодар ул. Демуса 43"
+                            text = "Краснодар Демуса 43"
                         }
                     }
                     field("Дата доставки") {
-                        datepicker(deliveryDate) {
+                        datepicker(deliveryDateField) {
                             value = LocalDate.now()
                         }
                     }
                     field("Время доставки") {
                         textfield("12:00")
                         textfield("16:00")
+                    }
 
-                    }
-                    field("Список товаров") {
-                    }
+                    field("Список товаров")
                     scrollpane {
+                        tooltip("Информация о товарах, доавленных в список")
                         minHeightProperty().set(100.0)
                         vbox {
                             children.bind(selectedProducts) { product ->
@@ -99,7 +111,6 @@ class OrderCreateScreen : Fragment("Новый заказ") {
                         }
                     }
 
-
                     field("Список товаров") {
                         combobox(productListItem, productList) {
                             cellFormat { text = it.name }
@@ -119,34 +130,29 @@ class OrderCreateScreen : Fragment("Новый заказ") {
                         }
                     }
 
-
                     field("Тип доставки") {
                         val types = listOf("Внутреннее перемещение", "Обычная доставка")
                         val item = SimpleStringProperty(types.firstOrNull())
-                        combobox(item, types)
+                        comboboxOrderType = combobox(item, types)
                     }
-
                     field("Срочность доставки") {
                         val deliveryTypes = listOf("Срочная доставка", "Экспресс доставка")
                         val deliveryTypeItem = SimpleStringProperty(deliveryTypes.firstOrNull())
-                        combobox(deliveryTypeItem, deliveryTypes)
+                        comboboxDeliveryUrgency = combobox(deliveryTypeItem, deliveryTypes)
                     }
                     field("Вес груза") {
-                        label("543 кг.") {
-                            //TODO: uncomment It
-                            //totalWeight.onChange { text = "$it кг." }
+                        label(totalWeight) {
+                            totalWeight.onChange { text = "$it кг." }
                         }
                     }
                     field("Объём груза") {
-                        label("6.72 м3.") {
-                            //TODO: uncomment It
-//                            minSquare.onChange { text = "$it м3." }
+                        label(totalVolume) {
+                            totalVolume.onChange { text = "$it м3." }
                         }
                     }
                     field("Итого") {
-                        label("912 руб.") {
-                            //TODO: uncomment It
-                            // totalCost.onChange { text = "$it руб." }
+                        label(totalCost) {
+                             totalCost.onChange { text = "$it руб." }
                         }
                     }
                 }
@@ -161,11 +167,60 @@ class OrderCreateScreen : Fragment("Новый заказ") {
                 button("Создать") {
                     enableWhen(model.valid)
                     action {
-                        val orderId = orderController.createOrder(
-                            departure.value,
-                            destination.value,
-                            deliveryDate.value,
-                            selectedProducts.toList())
+//
+//                        val orderId = orderController.createOrder(
+//                            departure.value,
+//                            destination.value,
+//                            deliveryDateField.value,
+//                            isOrderCommon,
+//                            deliveryUrgency_,
+//                            selectedProducts.toList())
+//                        when (orderId) {
+//                            null -> println("Failed to create order.")
+//                            else -> println("Created new order with id=$orderId")
+//                        }
+                        val orderId = orderController.createOrder(OrderCreateRequest().apply {
+                            createDate = Date()
+                            departurePoint = departure.value
+                            destinationPoint = destination.value
+                            isOrderCommon = comboboxOrderType.selectedItem == "Обычная доставка"
+                            val date = Date.from(
+                                deliveryDateField.value
+                                    .atStartOfDay(ZoneId.systemDefault()).toInstant()
+                            )
+                            deliveryDate = date
+                            deliveryUrgency = comboboxDeliveryUrgency.selectedItem
+
+                            baseCost = 100F // TODO: implement calculation by formula
+
+                            /**
+                             * Пункт отправления
+                             */
+                            val departureAddressParts = departure.value.split(" ")
+                            val departureLatLong = getCoordsFromAddress(departureAddressParts[0], departureAddressParts[1], departureAddressParts[2])!!
+                            departurePoint = destination.value
+                            departureLongitude = departureLatLong.longitude.toFloat()
+                            departureLatitude = departureLatLong.latitude.toFloat()
+
+                            /**
+                             * Пункт назначения
+                             */
+                            val destinationAddressParts = destination.value.split(" ")
+                            val destinationLatLong = getCoordsFromAddress(destinationAddressParts[0], destinationAddressParts[1], destinationAddressParts[2])!!
+                            destinationPoint = destination.value
+                            destinationLongitude = destinationLatLong.longitude.toFloat()
+                            destinationLatitude = destinationLatLong.latitude.toFloat()
+
+                            /**
+                             * Список товаров
+                             */
+                            productList = selectedProducts.toList().map { product ->
+                                OrderCreateRequest.Product().apply {
+                                    productId = product.id
+                                    count = product.count
+                                }
+                            }
+                        })
                         when (orderId) {
                             null -> println("Failed to create order.")
                             else -> println("Created new order with id=$orderId")

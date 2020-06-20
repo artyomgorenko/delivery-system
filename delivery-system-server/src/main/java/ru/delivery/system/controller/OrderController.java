@@ -143,8 +143,14 @@ public class OrderController {
         orderInfoOutgoing.setStatus(orderEntity.getStatus());
         orderInfoOutgoing.setTransportId(orderEntity.getTransport() == null ? null : orderEntity.getTransport().getId());
         orderInfoOutgoing.setDriverId(orderEntity.getUser() == null ? null : orderEntity.getUser().getId());
+        
         orderInfoOutgoing.setDeparturePoint(orderEntity.getDeparturePoint());
+        orderInfoOutgoing.setDepartureLongitude(orderEntity.getDepartureLongitude() == null ? null : orderEntity.getDepartureLongitude().doubleValue());
+        orderInfoOutgoing.setDepartureLatitude(orderEntity.getDepartureLatitude() == null ? null : orderEntity.getDepartureLatitude().doubleValue());
+        
         orderInfoOutgoing.setDestinationPoint(orderEntity.getDestinationPoint());
+        orderInfoOutgoing.setDestinationLongitude(orderEntity.getDestinationLongitude() == null ? null : orderEntity.getDestinationLongitude().doubleValue());
+        orderInfoOutgoing.setDestinationLatitude(orderEntity.getDestinationLatitude() == null ? null : orderEntity.getDestinationLatitude().doubleValue());
 
         // Route
         if (!orderEntity.getOrderMapRoutes().isEmpty()) {
@@ -312,11 +318,13 @@ public class OrderController {
                     respBody.setDeliveryRouteLength(deliveryDistance);
                 }
                 Date startDate = orderEntity.getStartDate();
-                Date startShipmentDate = orderEntity.getStartShipmentDate();
+                Date startShipmentDatTODOe = orderEntity.getStartShipmentDate();
                 Date startDeliveringDate = orderEntity.getStartDeliveringDate();
                 Date doneDate = orderEntity.getDoneDate();
                 Long time = doneDate.getTime() - startDate.getTime();
-                Double totalCost = time.doubleValue() / 1000 / 60 / 60 * 150;
+                double deliveryCost = time.doubleValue() / 1000 / 60 / 60 * 150; // TODO: Расичитывать стоиомсть доставки на грузопреревозку по формуле
+                orderEntity.setDeliveryCost((float) deliveryCost);
+                double totalCost = orderEntity.getBaseCost() + deliveryCost;
 
                 respBody.setStartDate(orderEntity.getStartDate());
                 respBody.setStartShipmentDate(orderEntity.getStartShipmentDate());

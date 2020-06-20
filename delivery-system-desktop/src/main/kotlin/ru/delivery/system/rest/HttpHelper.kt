@@ -41,6 +41,13 @@ object HttpHelper {
         return client.newCall(request).execute()
     }
 
+    fun syncGetFullUrl(url: String): Response {
+        val request = Request.Builder()
+            .url(url)
+            .build()
+        return client.newCall(request).execute()
+    }
+
     fun syncPost(url: String, jsonBody: String): Response {
         val body = RequestBody.create(JSON, jsonBody)
         val request = Request.Builder()

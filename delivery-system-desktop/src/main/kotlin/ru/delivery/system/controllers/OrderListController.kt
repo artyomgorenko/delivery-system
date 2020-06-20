@@ -31,9 +31,25 @@ object OrderListController {
         return allOrders.map { orderInfo -> Order().apply {
             orderInfo.orderId?.let { orderId = it }
             orderInfo.status?.let { status = it }
+
             orderInfo.departurePoint?.let { departurePoint = it }
+            orderInfo.departureLongitude?.let { departureLongitude = it }
+            orderInfo.departureLatitude?.let { departureLatitude = it }
+
             orderInfo.destinationPoint?.let { destinationPoint = it }
-            orderInfo.destinationPoint?.let { destinationPoint = it }
+            orderInfo.destinationLongitude?.let { destinationLongitude = it }
+            orderInfo.destinationLatitude?.let { destinationLatitude = it }
+            orderInfo.productList?.let { productList = it.toMutableList() }
+
+            val coords = ArrayList<LatLong>()
+            orderInfo.orderRoute?.let { it.routePoints
+                ?.forEach { point ->
+                    val latLong = LatLong(point.geoPoint!!.latitude!!.toDouble(), point.geoPoint!!.longitude!!.toDouble())
+                    coords.add(latLong)
+                }
+            }
+            track = Track(coords = coords, name = "МАРШРУТ")
+            
             deliveryTime = "12:00"
         } }
     }

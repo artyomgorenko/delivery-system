@@ -79,6 +79,18 @@ public class OrderEntity {
     private Timestamp doneDate;
 
     @Getter @Setter
+    @Column(name = "O_BASE_COST")
+    private Float baseCost;
+
+    @Getter @Setter
+    @Column(name = "O_DELIVERY_COST")
+    private Float deliveryCost;
+
+    @Getter @Setter
+    @Column(name = "O_TYPE")
+    private String type;
+
+    @Getter @Setter
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderDetailsEntity> orderDetails;
 

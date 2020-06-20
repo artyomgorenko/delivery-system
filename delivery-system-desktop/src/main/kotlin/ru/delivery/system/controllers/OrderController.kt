@@ -10,6 +10,10 @@ import tornadofx.Controller
 import java.lang.Exception
 import java.time.LocalDate
 import java.util.*
+import java.time.ZoneId
+import java.time.temporal.TemporalQueries.localDate
+
+
 
 class OrderController : Controller() {
 
@@ -20,22 +24,29 @@ class OrderController : Controller() {
      * Отправляет запрос на создание заказа
      */
     fun createOrder(
-        deaprute: String,
-        destination: String,
-        deliveryDate: LocalDate,
-        productList_: List<ProductListItem>
+//        deaprute: String,
+//        destination: String,
+//        deliveryDate_: LocalDate,
+//        isOrderCommon_: Boolean,
+//        deliveryUrgency_: String?,
+//        productList_: List<ProductListItem>
+        orderInfo: OrderCreateRequest
     ) : Int? {
-        val orderInfo = OrderCreateRequest().apply {
-            createDate = Date()
-            departurePoint = deaprute
-            destinationPoint = destination
-            productList = productList_.map { product ->
-                OrderCreateRequest.Product().apply {
-                    productId = product.id
-                    count = product.count
-                }
-            }
-        }
+//        val orderInfo = OrderCreateRequest().apply {
+//            createDate = Date()
+//            departurePoint = deaprute
+//            destinationPoint = destination
+//            isOrderCommon = isOrderCommon_
+//            val date = Date.from(deliveryDate_.atStartOfDay(ZoneId.systemDefault()).toInstant())
+//            deliveryDate = date
+//            deliveryUrgency = deliveryUrgency_
+//            productList = productList_.map { product ->
+//                OrderCreateRequest.Product().apply {
+//                    productId = product.id
+//                    count = product.count
+//                }
+//            }
+//        }
 
         var orderId: Int? = null
         try {

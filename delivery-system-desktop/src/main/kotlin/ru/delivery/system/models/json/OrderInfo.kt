@@ -27,8 +27,20 @@ class OrderInfo {
     @JsonProperty("departurePoint")
     var departurePoint: String? = null
 
+    @JsonProperty("departureLongitude")
+    var departureLongitude: Double? = null
+
+    @JsonProperty("departureLatitude")
+    var departureLatitude: Double? = null
+
     @JsonProperty("destinationPoint")
     var destinationPoint: String? = null
+
+    @JsonProperty("destinationLongitude")
+    var destinationLongitude: Double? = null
+
+    @JsonProperty("destinationLatitude")
+    var destinationLatitude: Double? = null
 
     /**
      * Список продуктов в заказе
