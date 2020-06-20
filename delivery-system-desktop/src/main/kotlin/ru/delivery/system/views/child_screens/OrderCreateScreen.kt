@@ -77,6 +77,7 @@ class OrderCreateScreen : Fragment("Новый заказ") {
                     field("Список товаров") {
                     }
                     scrollpane {
+                        tooltip("Информация о товарах, доавленных в список")
                         minHeightProperty().set(100.0)
                         vbox {
                             children.bind(selectedProducts) { product ->
