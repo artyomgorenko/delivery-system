@@ -1,5 +1,6 @@
 package ru.delivery.system.views.child_screens
 
+import javafx.scene.control.Tooltip
 import ru.delivery.system.common.ExcelUtils
 import ru.delivery.system.controllers.OrderListController
 import ru.delivery.system.models.json.OrderInfo
@@ -89,14 +90,21 @@ class OrderScreen : View("Заказы") {
                     ).observable()
                     fieldset("Список товаров") {
                         tableview(orderProductList) {
+
                             column("Название", OrderInfo.Product::name)
                             column("Количество", OrderInfo.Product::count)
                         }
                     }
                     hbox {
                         spacingProperty().set(5.0)
-                        button("Создать ТТН").action { ExcelUtils().createTtnDoc() }
-                        button("Создать Путевой лист")
+                        button("Создать ТТН") {
+                            tooltip("Создание документа товаро транспортная накладная. Документ будет сохранен папке documents")
+                            action{ExcelUtils().createTtnDoc()}
+                        }
+                        button("Создать Путевой лист") {
+                            action{ExcelUtils().createTtnDoc()}
+                            tooltip("Создание документа Путевой лист. Документ будет сохранен папке documents")
+                        }
                     }
                 }
             }
