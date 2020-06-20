@@ -25,24 +25,26 @@ class ProductScreen : View("Товары") {
     private val model = ProductModel(Product())
 
     override fun onDock() {
-        val response = HttpHelper.syncGet("productId/productList")
-        if (response.isSuccessful) {
-            response.body()?.let { body ->
-                val productListEntity = JsonSerializer().toEntity<ProductListEntity>(body.string())
-                val productList = productListEntity.productList!!
-                products.clear()
-                products.addAll(productList.map {  product ->
-                    Product().apply {
-                        product.productId?.let { productId = it}
-                        product.name?.let { name = it}
-                        product.cost?.let { cost = it}
-                        product.category?.let { category = it}
-                        product.weight?.let { weight = it}
-                        product.height?.let { height = it}
-                        product.width?.let { width = it}
-                        product.length?.let { length = it}
-                    }
-                })
+        val resp = HttpHelper.syncGet("productId/productList")
+        resp.use { response ->
+            if (response.isSuccessful) {
+                response.body()?.let { body ->
+                    val productListEntity = JsonSerializer().toEntity<ProductListEntity>(body.string())
+                    val productList = productListEntity.productList!!
+                    products.clear()
+                    products.addAll(productList.map {  product ->
+                        Product().apply {
+                            product.productId?.let { productId = it}
+                            product.name?.let { name = it}
+                            product.cost?.let { cost = it}
+                            product.category?.let { category = it}
+                            product.weight?.let { weight = it}
+                            product.height?.let { height = it}
+                            product.width?.let { width = it}
+                            product.length?.let { length = it}
+                        }
+                    })
+                }
             }
         }
         super.onDock()
